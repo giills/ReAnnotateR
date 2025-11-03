@@ -1,0 +1,11 @@
+Title: ReAnnotateR
+Version:
+Author: Julia Gilley
+Description: ReAnnotateR provides a means to automatically add biological 
+meaning to genomic regions given only their chromosome coordinates 
+(specifically from BED files).
+Depends:
+Imports: 
+Suggests:
+    
+
