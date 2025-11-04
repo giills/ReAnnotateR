@@ -1,11 +1,15 @@
-Title: ReAnnotateR
-Version:
-Author: Julia Gilley
-Description: ReAnnotateR provides a means to automatically add biological 
-meaning to genomic regions given only their chromosome coordinates 
-(specifically from BED files).
-Depends:
+Package: ReAnnotateR
+Title: Re-annotate Genomic Intervals from BED Files
+Version: 0.0.0.9000
+Authors@R: 
+    person("Julia", "Gilley", email="julia.gilley@mail.utoronto.ca", role = c("aut", "cre"))
+Description: Provides functions to annotate genomic regions from BED files by linking intervals to genes, genomic features, and biological functions. Includes visualization and enrichment analysis.
+License: MIT
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends: R (>= 3.1.0)
 Imports: 
-Suggests:
-    
-
+    GenomicRanges,
+    ggplot2,
+    rtracklayer
