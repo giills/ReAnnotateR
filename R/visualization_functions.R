@@ -1,9 +1,7 @@
 #' Plot Feature Composition of Genomic Intervals
 #'
-#' Plots the proportion of genomic intervals that overlap promoters, exons, introns, or intergenic regions
-#'
-#' @param gr A GRanges object with a metadata column named "feature" showing the feature type for each interval
-#' @return A ggplot2 object showing feature composition as a bar plot.
+#' @param gr GRanges object with a "feature" metadata column
+#' @return ggplot2 object showing feature composition as a bar plot
 #' @examples
 #' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
 #' gr <- annotate_regions(gr, txdb_info)
@@ -36,11 +34,9 @@ plot_feature_composition <- function(gr) {
 
 #' Plot Chromosomal Density of Genomic Intervals
 #'
-#' Shows the distribution of genomic intervals along chromosomes
-#'
-#' @param gr A GRanges object containing genomic intervals
-#' @param bin_size Integer specifying the size of bins in base pairs (default 1e6)
-#' @return A ggplot2 object showing the number of intervals per bin along each chromosome
+#' @param gr GRanges object containing genomic intervals
+#' @param bin_size Integer specifying bin size in base pairs (default 1e6)
+#' @return ggplot2 object showing number of intervals per bin along each chromosome
 #' @examples
 #' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
 #' plot_chromosomal_density(gr)
@@ -69,11 +65,9 @@ plot_chromosomal_density <- function(gr, bin_size = 1e6) {
 
 #' Plot Functional Enrichment Results
 #'
-#' Visualizes enriched biological functions or pathways.
-#'
-#' @param enrich_result An object returned from `functional_terms()`
-#' @param top_n Integer which is the number of top terms to plot (default 10)
-#' @return A ggplot2 object showing enrichment scores for top terms
+#' @param enrich_result Object returned from functional_terms()
+#' @param top_n Integer, number of top terms to plot (default 10)
+#' @return ggplot2 object showing enrichment scores for top terms
 #' @examples
 #' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
 #' enrich_res <- functional_terms(gr)
@@ -110,12 +104,10 @@ plot_enrichment <- function(enrich_result, top_n = 10) {
 
 #' Plot Chromosome Ideogram with Intervals
 #'
-#' Draws chromosome ideograms showing the locations of intervals
-#'
-#' @param gr A GRanges object with genomic intervals
-#' @param genome Reference genome build (like "hg38")
-#' @param chromosomes Character vector. Which chromosomes to plot (default all in `seqlevels(gr)`)
-#' @return A Gviz plot displaying intervals on chromosome ideograms
+#' @param gr GRanges object with genomic intervals
+#' @param genome Reference genome build (default "hg38")
+#' @param chromosomes Character vector of chromosomes to plot (default all)
+#' @return Gviz plot displaying intervals on chromosome ideograms
 #' @examples
 #' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
 #' plot_ideogram(gr)
@@ -138,17 +130,13 @@ plot_ideogram <- function(gr, genome = "hg38", chromosomes = NULL) {
   }
 }
 
-
 #' Plot Regulatory Regions Overlaps
 #'
-#' Highlights intervals overlapping regulatory elements like enhancers or promoters.
-#'
-#' @param gr A GRanges object with your intervals.
-#' @param regulatory_gr A GRanges object with regulatory regions.
-#' @return A ggplot2 object showing which intervals overlap regulatory regions.
+#' @param gr GRanges object with your intervals
+#' @param regulatory_gr GRanges object with regulatory regions
+#' @return ggplot2 object showing which intervals overlap regulatory regions
 #' @examples
 #' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-#' # regulatory_gr would be your regulatory region GRanges
 #' plot_regulatory_regions(gr, regulatory_gr)
 #' @export
 plot_regulatory_regions <- function(gr, regulatory_gr) {
@@ -171,10 +159,8 @@ plot_regulatory_regions <- function(gr, regulatory_gr) {
 
 #' Plot Missing Annotations
 #'
-#' Shows intervals that could not be annotated or mapped to features/genes.
-#'
-#' @param gr A GRanges object with a metadata column `feature` indicating annotation.
-#' @return A ggplot2 barplot showing counts of annotated vs. unannotated intervals.
+#' @param gr GRanges object with a "feature" metadata column
+#' @return ggplot2 barplot showing counts of annotated vs. unannotated intervals
 #' @examples
 #' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
 #' gr$feature <- c("promoter", "intergenic", NA, "exon")
@@ -189,12 +175,11 @@ plot_missing_annotations <- function(gr) {
     ggplot2::labs(x = "", y = "Count", title = "Annotated vs Missing Intervals") +
     ggplot2::theme_minimal()
 }
+
 #' Plot Annotation Summary
 #'
-#' Generates summary plots showing the distribution of genomic features across intervals.
-#'
-#' @param gr A GRanges object with a metadata column `feature` indicating annotation type (e.g., promoter, exon, intron, intergenic).
-#' @return A ggplot2 barplot showing counts of intervals per feature type.
+#' @param gr GRanges object with a "feature" metadata column
+#' @return ggplot2 barplot showing counts of intervals per feature type
 #' @examples
 #' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
 #' gr$feature <- c("promoter", "exon", "intron", "intergenic", NA)
@@ -211,4 +196,3 @@ plot_annotation_summary <- function(gr) {
     ggplot2::labs(x = "Feature Type", y = "Count", title = "Annotation Summary") +
     ggplot2::theme_minimal()
 }
-

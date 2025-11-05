@@ -4,30 +4,63 @@
 #' @param file path to a BED file
 #' @return `GRanges` object containing the intervals from the BED file
 #' @examples
-#' bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
-#' gr <- read_bed(bed_file)
-#' @import rtracklayer
-#' @import GenomicRanges
+#' data(example_bed)
+#' bed_path <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+#' gr <- read_bed(bed_path)
+#' @importFrom rtracklayer start end
+#' @importFrom GenomicRanges GRanges mcols strand
+#' @importFrom IRanges IRanges
 #' @export
 read_bed <- function(file) {
-  if (!file.exists(file)) {
-    print("This file does not exist")
+  if (!is.character(file) || length(file) != 1 || is.na(file)) {
     return(NULL)
   }
-  gr <- rtracklayer::import(file, format = "BED")
   
-  start_positions <- start(gr)
-  for (i in seq_along(start(gr))) {
-    if (start(gr)[i] < 1) {
-      print("All start positions must be >= 1")
+  if (!file.exists(file)) {
+    message("This file does not exist")
+    return(NULL)
+  }
+  
+  tryCatch({
+    bed_data <- read.table(file, header = FALSE, stringsAsFactors = FALSE)
+  }, error = function(e) {
+    message("Error reading BED file: ", e$message)
+    return(NULL)
+  })
+  
+  n_cols <- ncol(bed_data)
+  
+  if (n_cols < 3) {
+    message("BED file must have at least 3 columns! (chr, start, end)")
+    return(NULL)
+  }
+  
+  gr <- GenomicRanges::GRanges(
+    seqnames = bed_data[, 1],
+    ranges = IRanges::IRanges(start = as.numeric(bed_data[, 2]) + 1,
+                              end = as.numeric(bed_data[, 3]))
+  )
+  
+  if (n_cols >= 4) {
+    GenomicRanges::mcols(gr)$name <- bed_data[, 4]
+  }
+  if (n_cols >= 5) {
+    GenomicRanges::mcols(gr)$score <- as.numeric(bed_data[, 5])
+  }
+  if (n_cols >= 6) {
+    GenomicRanges::strand(gr) <- bed_data[, 6]
+  }
+  
+  for (i in seq_along(rtracklayer::start(gr))) {
+    if (rtracklayer::start(gr)[i] < 1) {
+      message("All start positions must be >= 1")
       return(NULL)
     }
   }
   
-  end_positions <- end(gr)
-  for (i in seq_along(start(gr))) {
-    if (end(gr)[i] < start(gr)[i]) {
-      print("All end positions must be >= start positions")
+  for (i in seq_along(rtracklayer::start(gr))) {
+    if (rtracklayer::end(gr)[i] < rtracklayer::start(gr)[i]) {
+      message("All end positions must be >= start positions")
       return(NULL)
     }
   }
@@ -45,17 +78,18 @@ read_bed <- function(file) {
 #' gr <- read_bed(bed_file)
 #' chain_file <- system.file("extdata", "hg19ToHg38.over.chain", package = "ReAnnotateR")
 #' gr_new <- convert_coordinates(gr, chain_file)
-#' @import rtracklayer
-#' @import GenomicRanges
+#' @importFrom rtracklayer start end
+#' @importFrom GenomicRanges GRanges mcols strand
+#' @importFrom IRanges IRanges
 #' @export
 convert_coordinates <- function(gr, chain_file) {
   if (!inherits(gr, "GRanges")) {
-    print("gr must be a GRanges object")
+    message("gr must be a GRanges object")
     return(NULL)
   }
   
   if (!file.exists(chain_file)) {
-    print("Chain file does not exist.")
+    message("Chain file does not exist.")
     return(NULL)
   }
   
@@ -64,4 +98,157 @@ convert_coordinates <- function(gr, chain_file) {
   gr_new <- unlist(gr_new_list)
   
   return(gr_new)
+}
+
+#' Export annotated or enriched results
+#'
+#' Saves annotated genomic intervals or enrichment results to a file
+#' Supports writing GRanges, data frames, or tibbles in TSV or CSV format
+#'
+#' @param object The data to export (annotated GRanges or enrichment data frame)
+#' @param file Path to the output file
+#' @param format Output format, either "tsv" or "csv"
+#' @return None because writes a file to disk
+#' @examples
+#' bed_path <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+#' gr <- read_bed(bed_path)
+#' export_results(gr, tempfile(fileext = ".tsv"), format = "tsv")
+#' @export
+export_results <- function(object, file, format = "tsv") {
+  if (format != "tsv" && format != "csv") {
+    print("Format must be either 'tsv' or 'csv'")
+    return(NULL)
+  }
+  if (methods::is(object, "GRanges")) {
+    df <- as.data.frame(object)
+  } else if (is.data.frame(object)) {
+    df <- object
+  } else {
+    print("Input must be a GRanges or data frame")
+    return(NULL)
+  }
+  if (format == "tsv") {
+    utils::write.table(df, file, sep = "\t", row.names = FALSE, quote = FALSE)
+  } else {
+    utils::write.csv(df, file, row.names = FALSE)
+  }
+}
+
+#' Export annotated or enriched results
+#'
+#' @param object GRanges object, data frame, or enrichment results list
+#' @param file Path to output file
+#' @param format Output format: "tsv", "csv", or "bed" (default "tsv")
+#' @return Invisible NULL
+#' @examples
+#' bed_path <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+#' gr <- read_bed(bed_path)
+#' temp_file <- tempfile(fileext = ".tsv")
+#' export_results(gr, temp_file, format = "tsv")
+#' @importFrom methods is
+#' @importFrom utils write.table write.csv
+#' @importFrom rtracklayer export
+#' @importFrom GenomicRanges seqnames start end strand mcols
+#' @export
+export_results <- function(object, file, format = "tsv") {
+  
+  if (!format %in% c("tsv", "csv", "bed")) {
+    message("Format must be 'tsv', 'csv', or 'bed'")
+    return(invisible(NULL))
+  }
+  
+  if (!is.character(file) || length(file) != 1) {
+    message("File path must be a single character string")
+    return(invisible(NULL))
+  }
+  
+  if (methods::is(object, "GRanges")) {
+    if (format == "bed") {
+      tryCatch({
+        rtracklayer::export(object, file, format = "BED")
+        message("Successfully exported GRanges to BED format: ", file)
+      }, error = function(e) {
+        message("Error exporting to BED format: ", e$message)
+        return(invisible(NULL))
+      })
+    } else {
+      df <- data.frame(
+        chr = as.character(GenomicRanges::seqnames(object)),
+        start = GenomicRanges::start(object),
+        end = GenomicRanges::end(object),
+        strand = as.character(GenomicRanges::strand(object))
+      )
+      
+      if (ncol(GenomicRanges::mcols(object)) > 0) {
+        mcols_df <- as.data.frame(GenomicRanges::mcols(object))
+        df <- cbind(df, mcols_df)
+      }
+      
+      if (format == "tsv") {
+        utils::write.table(df, file, sep = "\t", row.names = FALSE, quote = FALSE)
+        message("Successfully exported GRanges to TSV: ", file)
+      } else {
+        utils::write.csv(df, file, row.names = FALSE)
+        message("Successfully exported GRanges to CSV: ", file)
+      }
+    }
+    
+  } else if (is.data.frame(object)) {
+    if (format == "bed") {
+      message("BED format is only supported for GRanges objects. Using TSV instead.")
+      format <- "tsv"
+    }
+    
+    if (format == "tsv") {
+      utils::write.table(object, file, sep = "\t", row.names = FALSE, quote = FALSE)
+      message("Successfully exported data frame to TSV: ", file)
+    } else {
+      utils::write.csv(object, file, row.names = FALSE)
+      message("Successfully exported data frame to CSV: ", file)
+    }
+    
+  } else if (is.list(object)) {
+    if (format == "bed") {
+      message("BED format is not supported for enrichment results. Using TSV instead.")
+      format <- "tsv"
+    }
+    
+    file_base <- sub("\\.[^.]*$", "", file)
+    file_ext <- if (format == "tsv") ".tsv" else ".csv"
+    
+    exported_any <- FALSE
+    
+    if ("go" %in% names(object) && !is.null(object$go)) {
+      go_file <- paste0(file_base, "_go", file_ext)
+      if (format == "tsv") {
+        utils::write.table(object$go, go_file, sep = "\t", row.names = FALSE, quote = FALSE)
+      } else {
+        utils::write.csv(object$go, go_file, row.names = FALSE)
+      }
+      message("Successfully exported GO results to: ", go_file)
+      exported_any <- TRUE
+    }
+    
+    if ("kegg" %in% names(object) && !is.null(object$kegg)) {
+      kegg_file <- paste0(file_base, "_kegg", file_ext)
+      if (format == "tsv") {
+        utils::write.table(object$kegg, kegg_file, sep = "\t", row.names = FALSE, quote = FALSE)
+      } else {
+        utils::write.csv(object$kegg, kegg_file, row.names = FALSE)
+      }
+      message("Successfully exported KEGG results to: ", kegg_file)
+      exported_any <- TRUE
+    }
+    
+    if (!exported_any) {
+      message("No GO or KEGG results found in the list to export")
+      return(invisible(NULL))
+    }
+    
+  } else {
+    message("Input must be a GRanges object, data frame, or list of enrichment results")
+    return(invisible(NULL))
+  }
+  
+  return(invisible(NULL))
 }

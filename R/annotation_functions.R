@@ -13,7 +13,6 @@
 #' txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 #' gr <- GRanges(seqnames = "chr1", ranges = IRanges(100000, 101000))
 #' annotate_regions(gr, txdb)
-#' @import GenomicRanges
 #' @importFrom GenomicFeatures promoters exons intronsByTranscript genes
 #' @export
 annotate_regions <- function(gr, txdb_info, promoter_up = 3000, promoter_down = 3000) {
@@ -23,13 +22,13 @@ annotate_regions <- function(gr, txdb_info, promoter_up = 3000, promoter_down = 
   introns_list <- GenomicFeatures::intronsByTranscript(txdb_info)
   introns <- unlist(introns_list, use.names = FALSE)
   
-  feature <- rep("intergenic", length(gr))
+  feature_type <- rep("intergenic", length(gr))
   
   overlap_promoter <- GenomicRanges::findOverlaps(gr, promoters)
   if (length(overlap_promoter) > 0) {
     hits <- queryHits(overlap_promoter)
     for (i in hits) {
-      feature[i] <- "promoter"
+      feature_type[i] <- "promoter"
     }
   }
   
@@ -37,7 +36,7 @@ annotate_regions <- function(gr, txdb_info, promoter_up = 3000, promoter_down = 
   if (length(overlap_exon) > 0) {
     hits <- queryHits(overlap_exon)
     for (i in hits) {
-      feature[i] <- "exon"
+      feature_type[i] <- "exon"
     }
   }
   
@@ -45,14 +44,13 @@ annotate_regions <- function(gr, txdb_info, promoter_up = 3000, promoter_down = 
   if (length(overlap_intron) > 0) {
     hits <- queryHits(overlap_intron)
     for (i in hits) {
-      feature[i] <- "intron"
+      feature_type[i] <- "intron"
     }
   }
   
-  mcols(gr)$feature <- feature
+  mcols(gr)$feature_type <- feature_type
   return(gr)
 }
-
 
 
 #' Find the closest gene to each genomic region
@@ -69,48 +67,21 @@ annotate_regions <- function(gr, txdb_info, promoter_up = 3000, promoter_down = 
 #' txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 #' gr <- GRanges(seqnames = "chr1", ranges = IRanges(100000, 101000))
 #' nearest_gene(gr, txdb)
-#' @import GenomicRanges
 #' @importFrom GenomicFeatures genes
 #' @export
 nearest_gene <- function(gr, txdb_info) {
+  if (!("feature_type" %in% names(GenomicRanges::mcols(gr)))) {
+    stop("Input GRanges object must contain columns added by annotate_regions().")
+  }
+  
   all_genes_list <- GenomicFeatures::genes(txdb_info, single.strand.genes.only = FALSE)
   all_genes <- unlist(all_genes_list)
   
-  gene_ids <- names(all_genes)
-  if (is.null(gene_ids)) {
-    gene_ids <- as.character(seq_along(all_genes))
-  } else {
-    gene_ids <- as.character(gene_ids)
-  }
+  hits <- GenomicRanges::distanceToNearest(gr, all_genes)
   
-  nearest_names <- rep(NA, length(gr))
-  distances <- rep(NA, length(gr))
+  nearest_names <- names(all_genes)[S4Vectors::subjectHits(hits)]
+  distances <- S4Vectors::mcols(hits)$distance
   
-  hits <- GenomicRanges::nearest(gr, all_genes, select = "arbitrary")
-  
-  gr_starts <- start(gr)
-  gr_ends <- end(gr)
-  gene_starts <- start(all_genes)
-  gene_ends <- end(all_genes)
-  
-  for (i in seq_along(gr)) {
-    if (!is.na(hits[i])) {
-      nearest_names[i] <- gene_ids[hits[i]]
-      
-      interval_start <- gr_starts[i]
-      interval_end <- gr_ends[i]
-      gene_start <- gene_starts[hits[i]]
-      gene_end <- gene_ends[hits[i]]
-      
-      if (interval_end < gene_start) {
-        distances[i] <- gene_start - interval_end
-      } else if (interval_start > gene_end) {
-        distances[i] <- interval_start - gene_end
-      } else {
-        distances[i] <- 0
-      }
-    }
-  }
   GenomicRanges::mcols(gr)$nearest_gene <- nearest_names
   GenomicRanges::mcols(gr)$distance_to_gene <- distances
   return(gr)
@@ -151,15 +122,24 @@ nearest_gene <- function(gr, txdb_info) {
 #' library(GenomicRanges)
 #' library(clusterProfiler)
 #' library(org.Hs.eg.db)
-#' gr <- GRanges(seqnames = "chr1", ranges = IRanges(100000, 101000))
-#' mcols(gr)$nearest_gene <- "1"
-#' functional_terms(gr, org.Hs.eg.db)
-#' @import clusterProfiler
+#' gr <- GRanges(seqnames = "chr1", ranges = IRanges::IRanges(100000, 101000))
+#' GenomicRanges::mcols(gr)$nearest_gene <- "1"
+#' # Note: Running this example requires a valid OrgDb object like org.Hs.eg.db
+#' # functional_terms(gr, org.Hs.eg.db)
+#' 
+#' @importFrom clusterProfiler enrichGO enrichKEGG
 #' @importFrom stats na.omit
+#' @importFrom GenomicRanges mcols
 #' @export
 functional_terms <- function(gr, orgdb, go = TRUE, kegg = FALSE) {
   genes <- as.character(GenomicRanges::mcols(gr)$nearest_gene)
   genes <- stats::na.omit(genes)
+  
+  if (length(genes) == 0) {
+    message("No gene IDs found for enrichment analysis.")
+    return(NULL)
+  }
+  
   results <- list()
   
   if (go) {
@@ -205,8 +185,8 @@ functional_terms <- function(gr, orgdb, go = TRUE, kegg = FALSE) {
 #' @export
 fisher_enrichment <- function(gr, category, background_gr) {
   
-  gr_feature <- as.character(GenomicRanges::mcols(gr)$feature)
-  bg_feature <- as.character(GenomicRanges::mcols(background_gr)$feature)
+  gr_feature <- as.character(GenomicRanges::mcols(gr)$feature_type)
+  bg_feature <- as.character(GenomicRanges::mcols(background_gr)$feature_type)
   
   valid_categories <- unique(c(gr_feature, bg_feature))
   if (!(category %in% valid_categories)) {

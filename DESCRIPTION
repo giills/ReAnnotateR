@@ -4,12 +4,29 @@ Version: 0.0.0.9000
 Authors@R: 
     person("Julia", "Gilley", email="julia.gilley@mail.utoronto.ca", role = c("aut", "cre"))
 Description: Provides functions to annotate genomic regions from BED files by linking intervals to genes, genomic features, and biological functions. Includes visualization and enrichment analysis.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
-Depends: R (>= 3.1.0)
-Imports: 
+Depends: 
+    R (>= 3.5)
+Imports:
     GenomicRanges,
+    GenomicFeatures,
+    IRanges,
+    rtracklayer,
+    clusterProfiler,
+    stats,
+    methods,
+    utils,
     ggplot2,
-    rtracklayer
+    S4Vectors,
+    Gviz
+Suggests:
+    TxDb.Hsapiens.UCSC.hg38.knownGene,
+    org.Hs.eg.db,
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Config/testthat/edition: 3
