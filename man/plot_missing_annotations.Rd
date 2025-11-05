@@ -7,13 +7,13 @@
 plot_missing_annotations(gr)
 }
 \arguments{
-\item{gr}{A GRanges object with a metadata column \code{feature} indicating annotation.}
+\item{gr}{GRanges object with a "feature" metadata column}
 }
 \value{
-A ggplot2 barplot showing counts of annotated vs. unannotated intervals.
+ggplot2 barplot showing counts of annotated vs. unannotated intervals
 }
 \description{
-Shows intervals that could not be annotated or mapped to features/genes.
+Plot Missing Annotations
 }
 \examples{
 gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))

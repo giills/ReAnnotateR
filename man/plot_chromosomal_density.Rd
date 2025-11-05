@@ -7,15 +7,15 @@
 plot_chromosomal_density(gr, bin_size = 1e+06)
 }
 \arguments{
-\item{gr}{A GRanges object containing genomic intervals}
+\item{gr}{GRanges object containing genomic intervals}
 
-\item{bin_size}{Integer specifying the size of bins in base pairs (default 1e6)}
+\item{bin_size}{Integer specifying bin size in base pairs (default 1e6)}
 }
 \value{
-A ggplot2 object showing the number of intervals per bin along each chromosome
+ggplot2 object showing number of intervals per bin along each chromosome
 }
 \description{
-Shows the distribution of genomic intervals along chromosomes
+Plot Chromosomal Density of Genomic Intervals
 }
 \examples{
 gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))

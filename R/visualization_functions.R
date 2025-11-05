@@ -1,4 +1,6 @@
+#' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal theme geom_line facet_wrap coord_flip
 #' Plot Feature Composition of Genomic Intervals
+#' @importFrom rlang .data
 #'
 #' @param gr GRanges object with a "feature" metadata column
 #' @return ggplot2 object showing feature composition as a bar plot

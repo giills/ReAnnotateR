@@ -7,15 +7,15 @@
 plot_enrichment(enrich_result, top_n = 10)
 }
 \arguments{
-\item{enrich_result}{An object returned from \code{functional_terms()}}
+\item{enrich_result}{Object returned from functional_terms()}
 
-\item{top_n}{Integer which is the number of top terms to plot (default 10)}
+\item{top_n}{Integer, number of top terms to plot (default 10)}
 }
 \value{
-A ggplot2 object showing enrichment scores for top terms
+ggplot2 object showing enrichment scores for top terms
 }
 \description{
-Visualizes enriched biological functions or pathways.
+Plot Functional Enrichment Results
 }
 \examples{
 gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))

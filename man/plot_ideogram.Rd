@@ -7,17 +7,17 @@
 plot_ideogram(gr, genome = "hg38", chromosomes = NULL)
 }
 \arguments{
-\item{gr}{A GRanges object with genomic intervals}
+\item{gr}{GRanges object with genomic intervals}
 
-\item{genome}{Reference genome build (like "hg38")}
+\item{genome}{Reference genome build (default "hg38")}
 
-\item{chromosomes}{Character vector. Which chromosomes to plot (default all in \code{seqlevels(gr)})}
+\item{chromosomes}{Character vector of chromosomes to plot (default all)}
 }
 \value{
-A Gviz plot displaying intervals on chromosome ideograms
+Gviz plot displaying intervals on chromosome ideograms
 }
 \description{
-Draws chromosome ideograms showing the locations of intervals
+Plot Chromosome Ideogram with Intervals
 }
 \examples{
 gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))

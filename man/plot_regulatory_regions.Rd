@@ -7,18 +7,17 @@
 plot_regulatory_regions(gr, regulatory_gr)
 }
 \arguments{
-\item{gr}{A GRanges object with your intervals.}
+\item{gr}{GRanges object with your intervals}
 
-\item{regulatory_gr}{A GRanges object with regulatory regions.}
+\item{regulatory_gr}{GRanges object with regulatory regions}
 }
 \value{
-A ggplot2 object showing which intervals overlap regulatory regions.
+ggplot2 object showing which intervals overlap regulatory regions
 }
 \description{
-Highlights intervals overlapping regulatory elements like enhancers or promoters.
+Plot Regulatory Regions Overlaps
 }
 \examples{
 gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-# regulatory_gr would be your regulatory region GRanges
 plot_regulatory_regions(gr, regulatory_gr)
 }

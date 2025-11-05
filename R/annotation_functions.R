@@ -1,3 +1,4 @@
+#' @importFrom S4Vectors queryHits mcols mcols<-
 #' Annotate each genomic region with it's feature type
 #'
 #' Assigns the genomic feature of promoter, exon, intron, or intergenic to each interval

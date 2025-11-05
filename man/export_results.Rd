@@ -5,16 +5,20 @@
 \title{Export annotated or enriched results}
 \usage{
 export_results(object, file, format = "tsv")
+
+export_results(object, file, format = "tsv")
 }
 \arguments{
-\item{object}{The data to export (annotated GRanges or enrichment data frame)}
+\item{object}{GRanges object, data frame, or enrichment results list}
 
-\item{file}{Path to the output file}
+\item{file}{Path to output file}
 
-\item{format}{Output format, either "tsv" or "csv"}
+\item{format}{Output format: "tsv", "csv", or "bed" (default "tsv")}
 }
 \value{
 None because writes a file to disk
+
+Invisible NULL
 }
 \description{
 Saves annotated genomic intervals or enrichment results to a file
@@ -24,4 +28,8 @@ Supports writing GRanges, data frames, or tibbles in TSV or CSV format
 bed_path <- system.file("extdata", "example.bed", package = "ReAnnotateR")
 gr <- read_bed(bed_path)
 export_results(gr, tempfile(fileext = ".tsv"), format = "tsv")
+bed_path <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+gr <- read_bed(bed_path)
+temp_file <- tempfile(fileext = ".tsv")
+export_results(gr, temp_file, format = "tsv")
 }

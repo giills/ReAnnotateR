@@ -12,6 +12,7 @@ Depends:
     R (>= 3.5)
 Imports:
     GenomicRanges,
+    TxDb.Hsapiens.UCSC.hg38.knownGene,
     GenomicFeatures,
     IRanges,
     rtracklayer,
@@ -23,10 +24,11 @@ Imports:
     S4Vectors,
     Gviz
 Suggests:
-    TxDb.Hsapiens.UCSC.hg38.knownGene,
     org.Hs.eg.db,
     testthat (>= 3.0.0),
     knitr,
     rmarkdown
+    testthat,
+    kn
 VignetteBuilder: knitr
 Config/testthat/edition: 3

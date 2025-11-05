@@ -7,13 +7,13 @@
 plot_annotation_summary(gr)
 }
 \arguments{
-\item{gr}{A GRanges object with a metadata column \code{feature} indicating annotation type (e.g., promoter, exon, intron, intergenic).}
+\item{gr}{GRanges object with a "feature" metadata column}
 }
 \value{
-A ggplot2 barplot showing counts of intervals per feature type.
+ggplot2 barplot showing counts of intervals per feature type
 }
 \description{
-Generates summary plots showing the distribution of genomic features across intervals.
+Plot Annotation Summary
 }
 \examples{
 gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
