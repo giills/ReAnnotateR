@@ -10,7 +10,7 @@ read_bed(file)
 \item{file}{path to a BED file}
 }
 \value{
-\code{GRanges} object containing the intervals from the BED file
+`GRanges` object containing the intervals from the BED file
 }
 \description{
 Checks for invalid chromosome start and end positions

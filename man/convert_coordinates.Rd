@@ -7,12 +7,12 @@
 convert_coordinates(gr, chain_file)
 }
 \arguments{
-\item{gr}{a \code{GRanges} object}
+\item{gr}{a `GRanges` object}
 
 \item{chain_file}{A path to the chain file}
 }
 \value{
-A \code{GRanges} object with coordinates lifted over to the new assembly
+A `GRanges` object with coordinates lifted over to the new assembly
 }
 \description{
 Convert genomic coordinates between assemblies

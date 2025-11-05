@@ -1,34 +1,32 @@
 Package: ReAnnotateR
-Title: Re-annotate Genomic Intervals from BED Files
-Version: 0.0.0.9000
-Authors@R: 
-    person("Julia", "Gilley", email="julia.gilley@mail.utoronto.ca", role = c("aut", "cre"))
-Description: Provides functions to annotate genomic regions from BED files by linking intervals to genes, genomic features, and biological functions. Includes visualization and enrichment analysis.
+Type: Package
+Title: Genomic Region Annotation and Visualization
+Version: 0.1.0
+Author: Your Name
+Maintainer: Your Name <your@email.com>
+Description: Tools for annotating, enriching, and visualizing genomic BED regions.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
+LazyData: true
 RoxygenNote: 7.3.3
-Depends: 
-    R (>= 3.5)
+Depends:
+    R (>= 4.0.0)
 Imports:
     GenomicRanges,
-    TxDb.Hsapiens.UCSC.hg38.knownGene,
     GenomicFeatures,
-    IRanges,
     rtracklayer,
-    clusterProfiler,
-    stats,
-    methods,
-    utils,
-    ggplot2,
+    IRanges,
     S4Vectors,
-    Gviz
+    ggplot2,
+    dplyr,
+    tidyr,
+    clusterProfiler,
+    methods,
+    rlang
 Suggests:
+    TxDb.Hsapiens.UCSC.hg38.knownGene,
     org.Hs.eg.db,
-    testthat (>= 3.0.0),
-    knitr,
-    rmarkdown
+    rmarkdown,
     testthat,
-    kn
-VignetteBuilder: knitr
+    knitr
 Config/testthat/edition: 3
