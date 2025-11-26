@@ -1,15 +1,19 @@
-#' Get a GRanges object from a BED file
+#' Read BED file into GRanges object
 #'
-#' Checks for invalid chromosome start and end positions
+#' Loads a BED file and converts it to a GRanges object.
+#' Checks for invalid chromosome start and end positions.
+#'
 #' @param file path to a BED file
 #' @return `GRanges` object containing the intervals from the BED file
 #' @examples
-#' data(example_bed)
 #' bed_path <- system.file("extdata", "example.bed", package = "ReAnnotateR")
-#' gr <- read_bed(bed_path)
-#' @importFrom rtracklayer start end
-#' @importFrom GenomicRanges GRanges mcols strand
+#' if (file.exists(bed_path)) {
+#'   gr <- read_bed(bed_path)
+#' }
+#' @importFrom utils read.table
+#' @importFrom GenomicRanges GRanges strand seqnames start end
 #' @importFrom IRanges IRanges
+#' @importFrom S4Vectors mcols mcols<-
 #' @export
 read_bed <- function(file) {
   if (!is.character(file) || length(file) != 1 || is.na(file)) {
@@ -22,7 +26,7 @@ read_bed <- function(file) {
   }
   
   tryCatch({
-    bed_data <- read.table(file, header = FALSE, stringsAsFactors = FALSE)
+    bed_data <- utils::read.table(file, header = FALSE, stringsAsFactors = FALSE)
   }, error = function(e) {
     message("Error reading BED file: ", e$message)
     return(NULL)
@@ -42,24 +46,24 @@ read_bed <- function(file) {
   )
   
   if (n_cols >= 4) {
-    GenomicRanges::mcols(gr)$name <- bed_data[, 4]
+    S4Vectors::mcols(gr)$name <- bed_data[, 4]
   }
   if (n_cols >= 5) {
-    GenomicRanges::mcols(gr)$score <- as.numeric(bed_data[, 5])
+    S4Vectors::mcols(gr)$score <- as.numeric(bed_data[, 5])
   }
   if (n_cols >= 6) {
     GenomicRanges::strand(gr) <- bed_data[, 6]
   }
   
-  for (i in seq_along(rtracklayer::start(gr))) {
-    if (rtracklayer::start(gr)[i] < 1) {
+  for (i in seq_along(GenomicRanges::start(gr))) {
+    if (GenomicRanges::start(gr)[i] < 1) {
       message("All start positions must be >= 1")
       return(NULL)
     }
   }
   
-  for (i in seq_along(rtracklayer::start(gr))) {
-    if (rtracklayer::end(gr)[i] < rtracklayer::start(gr)[i]) {
+  for (i in seq_along(GenomicRanges::start(gr))) {
+    if (GenomicRanges::end(gr)[i] < GenomicRanges::start(gr)[i]) {
       message("All end positions must be >= start positions")
       return(NULL)
     }
@@ -70,17 +74,19 @@ read_bed <- function(file) {
 
 #' Convert genomic coordinates between assemblies
 #'
+#' Uses a chain file to lift genomic coordinates from one reference assembly to another
+#'
 #' @param gr a `GRanges` object
 #' @param chain_file A path to the chain file
 #' @return A `GRanges` object with coordinates lifted over to the new assembly
 #' @examples
 #' bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
-#' gr <- read_bed(bed_file)
 #' chain_file <- system.file("extdata", "hg19ToHg38.over.chain", package = "ReAnnotateR")
-#' gr_new <- convert_coordinates(gr, chain_file)
-#' @importFrom rtracklayer start end
-#' @importFrom GenomicRanges GRanges mcols strand
-#' @importFrom IRanges IRanges
+#' if (file.exists(bed_file) && file.exists(chain_file)) {
+#'   gr <- read_bed(bed_file)
+#'   gr_new <- convert_coordinates(gr, chain_file)
+#' }
+#' @importFrom rtracklayer import.chain liftOver
 #' @export
 convert_coordinates <- function(gr, chain_file) {
   if (!inherits(gr, "GRanges")) {
@@ -102,39 +108,8 @@ convert_coordinates <- function(gr, chain_file) {
 
 #' Export annotated or enriched results
 #'
-#' Saves annotated genomic intervals or enrichment results to a file
-#' Supports writing GRanges, data frames, or tibbles in TSV or CSV format
-#'
-#' @param object The data to export (annotated GRanges or enrichment data frame)
-#' @param file Path to the output file
-#' @param format Output format, either "tsv" or "csv"
-#' @return None because writes a file to disk
-#' @examples
-#' bed_path <- system.file("extdata", "example.bed", package = "ReAnnotateR")
-#' gr <- read_bed(bed_path)
-#' export_results(gr, tempfile(fileext = ".tsv"), format = "tsv")
-#' @export
-export_results <- function(object, file, format = "tsv") {
-  if (format != "tsv" && format != "csv") {
-    print("Format must be either 'tsv' or 'csv'")
-    return(NULL)
-  }
-  if (methods::is(object, "GRanges")) {
-    df <- as.data.frame(object)
-  } else if (is.data.frame(object)) {
-    df <- object
-  } else {
-    print("Input must be a GRanges or data frame")
-    return(NULL)
-  }
-  if (format == "tsv") {
-    utils::write.table(df, file, sep = "\t", row.names = FALSE, quote = FALSE)
-  } else {
-    utils::write.csv(df, file, row.names = FALSE)
-  }
-}
-
-#' Export annotated or enriched results
+#' Saves annotated genomic intervals or enrichment results to a file.
+#' Supports writing GRanges, data frames, or lists in TSV, CSV, or BED format
 #'
 #' @param object GRanges object, data frame, or enrichment results list
 #' @param file Path to output file
@@ -142,13 +117,16 @@ export_results <- function(object, file, format = "tsv") {
 #' @return Invisible NULL
 #' @examples
 #' bed_path <- system.file("extdata", "example.bed", package = "ReAnnotateR")
-#' gr <- read_bed(bed_path)
-#' temp_file <- tempfile(fileext = ".tsv")
-#' export_results(gr, temp_file, format = "tsv")
+#' if (file.exists(bed_path)) {
+#'   gr <- read_bed(bed_path)
+#'   temp_file <- tempfile(fileext = ".tsv")
+#'   export_results(gr, temp_file, format = "tsv")
+#' }
 #' @importFrom methods is
 #' @importFrom utils write.table write.csv
 #' @importFrom rtracklayer export
-#' @importFrom GenomicRanges seqnames start end strand mcols
+#' @importFrom GenomicRanges seqnames start end strand
+#' @importFrom S4Vectors mcols
 #' @export
 export_results <- function(object, file, format = "tsv") {
   
@@ -179,8 +157,8 @@ export_results <- function(object, file, format = "tsv") {
         strand = as.character(GenomicRanges::strand(object))
       )
       
-      if (ncol(GenomicRanges::mcols(object)) > 0) {
-        mcols_df <- as.data.frame(GenomicRanges::mcols(object))
+      if (ncol(S4Vectors::mcols(object)) > 0) {
+        mcols_df <- as.data.frame(S4Vectors::mcols(object))
         df <- cbind(df, mcols_df)
       }
       

@@ -1,3 +1,14 @@
-^LICENSE\.md$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^README\.Rmd$
+^README\.html$
+^LICENSE\.md$
+^\.git$
+^\.gitignore$
+^annotated_peaks\.bed$
+^annotated_peaks\.txt$
+^background_peaks\.bed$
+^example\.bed$
+^feature_distribution\.pdf$
+^workflow\.png$
+^_snaps$

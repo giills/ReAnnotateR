@@ -9,6 +9,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3
+VignetteBuilder: knitr
 Depends:
     R (>= 4.0.0)
 Imports:
@@ -18,15 +19,17 @@ Imports:
     IRanges,
     S4Vectors,
     ggplot2,
-    dplyr,
-    tidyr,
     clusterProfiler,
     methods,
     rlang
 Suggests:
-    TxDb.Hsapiens.UCSC.hg38.knownGene,
-    org.Hs.eg.db,
+  testthat (>= 3.0.0),
+    knitr,
     rmarkdown,
-    testthat,
-    knitr
+    BiocStyle,
+    Gviz,
+    org.Hs.eg.db,
+    TxDb.Hsapiens.UCSC.hg38.knownGene,
+    shiny,
+    TxDb.Hsapiens.UCSC.hg19.knownGene
 Config/testthat/edition: 3

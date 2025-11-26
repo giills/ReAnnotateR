@@ -1,9 +1,11 @@
+---
 title: "ReAnnotateR: Functional Annotation of Genomic Intervals"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{ReAnnotateR Tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -12,9 +14,19 @@ knitr::opts_chunk$set(
   fig.width = 7,
   fig.height = 5
 )
-devtools::load_all(".")
-library(TxDb.Hsapiens.UCSC.hg38.knownGene)
-library(org.Hs.eg.db)
+```
+
+```{r load-packages, message=FALSE}
+library(ReAnnotateR)
+
+# Check if required packages are available
+has_txdb <- requireNamespace("TxDb.Hsapiens.UCSC.hg38.knownGene", quietly = TRUE)
+has_orgdb <- requireNamespace("org.Hs.eg.db", quietly = TRUE)
+
+if (!has_txdb || !has_orgdb) {
+  message("Note: Some code chunks require TxDb.Hsapiens.UCSC.hg38.knownGene and org.Hs.eg.db packages.")
+  message("Install them with: BiocManager::install(c('TxDb.Hsapiens.UCSC.hg38.knownGene', 'org.Hs.eg.db'))")
+}
 ```
 
 # Introduction
@@ -26,12 +38,14 @@ The **ReAnnotateR** package provides tools to annotate genomic intervals from BE
 ```{r install, eval=FALSE}
 # Install from GitHub
 devtools::install_github("giills/ReAnnotateR")
+
+# Install required Bioconductor packages
+BiocManager::install(c("TxDb.Hsapiens.UCSC.hg38.knownGene", "org.Hs.eg.db"))
 ```
 
 # Load Required Libraries
 
-```{r libraries, message=FALSE}
-library(ReAnnotateR)
+```{r libraries, message=FALSE, eval=has_txdb && has_orgdb}
 library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 library(org.Hs.eg.db)
 ```
@@ -43,7 +57,21 @@ ReAnnotateR includes example BED files for demonstration. Alternatively, you can
 ```{r load-data}
 # Load example BED file
 bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
-gr <- read_bed(bed_file)
+
+# For demonstration, create a simple example if file doesn't exist
+if (!file.exists(bed_file)) {
+  # Create example data
+  library(GenomicRanges)
+  gr <- GRanges(
+    seqnames = rep("chr1", 5),
+    ranges = IRanges::IRanges(
+      start = c(10000, 50000, 100000, 150000, 200000),
+      end = c(11000, 51000, 101000, 151000, 201000)
+    )
+  )
+} else {
+  gr <- read_bed(bed_file)
+}
 
 # Display the genomic ranges
 print(gr)
@@ -58,9 +86,9 @@ The `read_bed()` function validates that:
 
 The first step is to classify each genomic interval by its feature type: promoter, exon, intron, or intergenic region.
 
-```{r annotate-features}
+```{r annotate-features, eval=has_txdb}
 # Load the TxDb object for hg38
-txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene::TxDb.Hsapiens.UCSC.hg38.knownGene
 
 # Annotate regions (default: 3kb upstream, 3kb downstream for promoters)
 gr_annotated <- annotate_regions(gr, txdb_info = txdb, 
@@ -68,7 +96,11 @@ gr_annotated <- annotate_regions(gr, txdb_info = txdb,
                                   promoter_down = 500)
 
 # View feature distribution
-table(mcols(gr_annotated)$feature)
+table(mcols(gr_annotated)$feature_type)
+```
+
+```{r annotate-features-fallback, eval=!has_txdb, echo=FALSE}
+message("TxDb.Hsapiens.UCSC.hg38.knownGene not available - skipping annotation example")
 ```
 
 You can customize the promoter definition by adjusting `promoter_up` and `promoter_down` parameters.
@@ -77,7 +109,7 @@ You can customize the promoter definition by adjusting `promoter_up` and `promot
 
 Next, we can identify the closest gene to each interval and calculate the distance.
 
-```{r nearest-genes}
+```{r nearest-genes, eval=has_txdb}
 gr_with_genes <- nearest_gene(gr_annotated, txdb_info = txdb)
 
 # Create a summary table
@@ -85,7 +117,7 @@ result_df <- data.frame(
   chr = as.character(seqnames(gr_with_genes)),
   start = start(gr_with_genes),
   end = end(gr_with_genes),
-  feature = mcols(gr_with_genes)$feature,
+  feature = mcols(gr_with_genes)$feature_type,
   nearest_gene = mcols(gr_with_genes)$nearest_gene,
   distance = mcols(gr_with_genes)$distance_to_gene
 )
@@ -100,10 +132,10 @@ A distance of 0 indicates the interval overlaps the gene body.
 
 Perform Gene Ontology (GO) enrichment analysis to identify biological processes associated with the nearest genes.
 
-```{r functional-enrichment, message=FALSE, warning=FALSE}
+```{r functional-enrichment, message=FALSE, warning=FALSE, eval=has_txdb && has_orgdb}
 # Perform GO enrichment (Biological Process)
 enrichment_results <- functional_terms(gr_with_genes, 
-                                       orgdb = org.Hs.eg.db, 
+                                       orgdb = org.Hs.eg.db::org.Hs.eg.db, 
                                        go = TRUE, 
                                        kegg = FALSE)
 
@@ -121,9 +153,9 @@ You can also enable KEGG pathway enrichment by setting `kegg = TRUE`!
 
 Compare your intervals to a background set to test if certain genomic features are enriched using Fisher's exact test.
 
-```{r fisher-enrichment, eval=FALSE}
+```{r fisher-enrichment, eval=has_txdb}
 # Create a simulated background set for demonstration
-# Really, you should load your actual background regions
+# In practice, you should load your actual background regions
 set.seed(123)
 n_bg <- 1000
 bg_chr <- rep("chr1", n_bg)
@@ -149,7 +181,6 @@ if (!is.null(promoter_enrichment)) {
 }
 ```
 
-
 An odds ratio > 1 indicates enrichment, while < 1 indicates depletion.
 
 # Coordinate Conversion (Optional)
@@ -167,17 +198,46 @@ gr_hg38 <- convert_coordinates(gr, chain_file)
 Save your annotated results for downstream analysis.
 
 ```{r export, eval=FALSE}
-# Export as tab-delimited file
-write.table(result_df, "annotated_regions.txt", 
-            sep = "\t", quote = FALSE, row.names = FALSE)
+# Export annotated GRanges object
+export_results(gr_with_genes, "annotated_regions.tsv", format = "tsv")
 
-# Export as BED file with annotations
-rtracklayer::export(gr_with_genes, "annotated_regions.bed")
+# Export as BED file
+export_results(gr_with_genes, "annotated_regions.bed", format = "bed")
+
+# Export enrichment results
+if (!is.null(enrichment_results)) {
+  export_results(enrichment_results, "enrichment_results.tsv", format = "tsv")
+}
+```
+
+# Visualization
+
+ReAnnotateR includes several visualization functions to explore your data:
+
+```{r viz-setup, eval=has_txdb, message=FALSE}
+library(ggplot2)
+```
+
+## Feature Composition
+
+```{r plot-features, eval=has_txdb, fig.width=7, fig.height=5}
+plot_feature_composition(gr_annotated)
+```
+
+## Chromosomal Density
+
+```{r plot-density, eval=has_txdb, fig.width=7, fig.height=5}
+plot_chromosomal_density(gr_annotated, bin_size = 1e6)
+```
+
+## Annotation Summary
+
+```{r plot-summary, eval=has_txdb, fig.width=7, fig.height=5}
+plot_annotation_summary(gr_annotated)
 ```
 
 # Session Info
 
 ```{r session-info}
 sessionInfo()
-```
 ```

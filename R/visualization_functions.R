@@ -1,21 +1,29 @@
-#' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal theme geom_line facet_wrap coord_flip
 #' Plot Feature Composition of Genomic Intervals
-#' @importFrom rlang .data
 #'
-#' @param gr GRanges object with a "feature" metadata column
+#' Creates a bar plot showing the distribution of genomic features
+#'
+#' @param gr GRanges object with a "feature_type" metadata column
 #' @return ggplot2 object showing feature composition as a bar plot
 #' @examples
-#' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-#' gr <- annotate_regions(gr, txdb_info)
-#' plot_feature_composition(gr)
+#' \dontrun{
+#' library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+#' bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+#' gr <- read_bed(bed_file)
+#' txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+#' gr_annotated <- annotate_regions(gr, txdb)
+#' plot_feature_composition(gr_annotated)
+#' }
+#' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal theme
+#' @importFrom S4Vectors mcols
+#' @importFrom rlang .data
 #' @export
 plot_feature_composition <- function(gr) {
-  if (!"feature" %in% colnames(GenomicRanges::mcols(gr))) {
-    message("GRanges object must have a 'feature' metadata column")
+  if (!"feature_type" %in% colnames(S4Vectors::mcols(gr))) {
+    message("GRanges object must have a 'feature_type' metadata column")
     return(NULL)
   }
   
-  feature_counts <- table(GenomicRanges::mcols(gr)$feature)
+  feature_counts <- table(S4Vectors::mcols(gr)$feature_type)
   feature_df <- data.frame(
     feature = names(feature_counts),
     count = as.numeric(feature_counts)
@@ -23,7 +31,7 @@ plot_feature_composition <- function(gr) {
   
   feature_df$feature <- factor(feature_df$feature, levels = c("promoter", "exon", "intron", "intergenic"))
   
-  ggplot2::ggplot(feature_df, ggplot2::aes(x = feature, y = count, fill = feature)) +
+  ggplot2::ggplot(feature_df, ggplot2::aes(x = .data$feature, y = .data$count, fill = .data$feature)) +
     ggplot2::geom_bar(stat = "identity") +
     ggplot2::labs(
       x = "Genomic Feature",
@@ -36,12 +44,21 @@ plot_feature_composition <- function(gr) {
 
 #' Plot Chromosomal Density of Genomic Intervals
 #'
+#' Creates a line plot showing the density of intervals across chromosomes
+#'
 #' @param gr GRanges object containing genomic intervals
 #' @param bin_size Integer specifying bin size in base pairs (default 1e6)
 #' @return ggplot2 object showing number of intervals per bin along each chromosome
 #' @examples
-#' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-#' plot_chromosomal_density(gr)
+#' bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+#' if (file.exists(bed_file)) {
+#'   gr <- read_bed(bed_file)
+#'   plot_chromosomal_density(gr)
+#' }
+#' @importFrom ggplot2 ggplot aes geom_line labs theme_minimal facet_wrap
+#' @importFrom GenomicRanges seqnames start
+#' @importFrom stats aggregate
+#' @importFrom rlang .data
 #' @export
 plot_chromosomal_density <- function(gr, bin_size = 1e6) {
   chr_list <- as.character(GenomicRanges::seqnames(gr))
@@ -54,7 +71,7 @@ plot_chromosomal_density <- function(gr, bin_size = 1e6) {
   density_df <- aggregate(start ~ chr + bin, data = df, FUN = length)
   colnames(density_df)[3] <- "count"
   
-  ggplot2::ggplot(density_df, ggplot2::aes(x = bin * bin_size, y = count, color = chr)) +
+  ggplot2::ggplot(density_df, ggplot2::aes(x = .data$bin * bin_size, y = .data$count, color = .data$chr)) +
     ggplot2::geom_line() +
     ggplot2::facet_wrap(~ chr, scales = "free_x") +
     ggplot2::labs(
@@ -67,13 +84,20 @@ plot_chromosomal_density <- function(gr, bin_size = 1e6) {
 
 #' Plot Functional Enrichment Results
 #'
-#' @param enrich_result Object returned from functional_terms()
+#' Creates a bar plot of the top enriched terms
+#'
+#' @param enrich_result Data frame or enrichment result object returned from functional_terms()
 #' @param top_n Integer, number of top terms to plot (default 10)
 #' @return ggplot2 object showing enrichment scores for top terms
 #' @examples
-#' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-#' enrich_res <- functional_terms(gr)
-#' plot_enrichment(enrich_res)
+#' \dontrun{
+#' bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+#' gr <- read_bed(bed_file)
+#' enrich_res <- functional_terms(gr, org.Hs.eg.db)
+#' plot_enrichment(enrich_res$go)
+#' }
+#' @importFrom ggplot2 ggplot aes geom_bar coord_flip labs theme_minimal
+#' @importFrom rlang .data
 #' @export
 plot_enrichment <- function(enrich_result, top_n = 10) {
   if (is.null(enrich_result) || length(enrich_result) == 0) {
@@ -93,7 +117,7 @@ plot_enrichment <- function(enrich_result, top_n = 10) {
   
   df$Description <- factor(df$Description, levels = rev(df$Description))
   
-  ggplot2::ggplot(df, ggplot2::aes(x = Description, y = -log10(p.adjust))) +
+  ggplot2::ggplot(df, ggplot2::aes(x = .data$Description, y = -log10(.data$p.adjust))) +
     ggplot2::geom_bar(stat = "identity", fill = "steelblue") +
     ggplot2::coord_flip() +
     ggplot2::labs(
@@ -106,20 +130,28 @@ plot_enrichment <- function(enrich_result, top_n = 10) {
 
 #' Plot Chromosome Ideogram with Intervals
 #'
+#' Creates an ideogram visualization showing intervals on chromosomes
+#'
 #' @param gr GRanges object with genomic intervals
 #' @param genome Reference genome build (default "hg38")
 #' @param chromosomes Character vector of chromosomes to plot (default all)
-#' @return Gviz plot displaying intervals on chromosome ideograms
+#' @return NULL (plots are created as side effect)
 #' @examples
-#' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
+#' \dontrun{
+#' bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+#' gr <- read_bed(bed_file)
 #' plot_ideogram(gr)
+#' }
+#' @importFrom GenomicRanges seqnames start end
 #' @export
 plot_ideogram <- function(gr, genome = "hg38", chromosomes = NULL) {
+  if (!requireNamespace("Gviz", quietly = TRUE)) {
+    stop("Package 'Gviz' is required for this function. Please install it.")
+  }
+  
   if (is.null(chromosomes)) {
     chromosomes <- unique(as.character(GenomicRanges::seqnames(gr)))
   }
-  
-  tracks <- list()
   
   for (chr in chromosomes) {
     chr_gr <- gr[GenomicRanges::seqnames(gr) == chr]
@@ -128,24 +160,39 @@ plot_ideogram <- function(gr, genome = "hg38", chromosomes = NULL) {
     ideogram <- Gviz::IdeogramTrack(genome = genome, chromosome = chr)
     data_track <- Gviz::AnnotationTrack(chr_gr, name = "Intervals", genome = genome, chromosome = chr)
     
-    Gviz::plotTracks(list(ideogram, data_track), from = min(start(chr_gr)), to = max(end(chr_gr)), chromosome = chr)
+    Gviz::plotTracks(list(ideogram, data_track), 
+                     from = min(GenomicRanges::start(chr_gr)), 
+                     to = max(GenomicRanges::end(chr_gr)), 
+                     chromosome = chr)
   }
+  
+  return(invisible(NULL))
 }
 
 #' Plot Regulatory Regions Overlaps
+#'
+#' Creates a bar plot showing overlaps with regulatory regions
 #'
 #' @param gr GRanges object with your intervals
 #' @param regulatory_gr GRanges object with regulatory regions
 #' @return ggplot2 object showing which intervals overlap regulatory regions
 #' @examples
-#' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-#' plot_regulatory_regions(gr, regulatory_gr)
+#' \dontrun{
+#' bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+#' gr <- read_bed(bed_file)
+#' # regulatory_gr would be loaded from a data source
+#' # plot_regulatory_regions(gr, regulatory_gr)
+#' }
+#' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal
+#' @importFrom GenomicRanges findOverlaps
+#' @importFrom S4Vectors queryHits
+#' @importFrom rlang .data
 #' @export
 plot_regulatory_regions <- function(gr, regulatory_gr) {
   overlaps <- GenomicRanges::findOverlaps(gr, regulatory_gr)
   overlap_flag <- rep("No overlap", length(gr))
   if (length(overlaps) > 0) {
-    overlap_flag[queryHits(overlaps)] <- "Overlap"
+    overlap_flag[S4Vectors::queryHits(overlaps)] <- "Overlap"
   }
   
   df <- data.frame(
@@ -153,7 +200,7 @@ plot_regulatory_regions <- function(gr, regulatory_gr) {
     Overlap = overlap_flag
   )
   
-  ggplot2::ggplot(df, ggplot2::aes(x = Interval, fill = Overlap)) +
+  ggplot2::ggplot(df, ggplot2::aes(x = .data$Interval, fill = .data$Overlap)) +
     ggplot2::geom_bar() +
     ggplot2::labs(x = "Interval", y = "Count", title = "Regulatory Region Overlaps") +
     ggplot2::theme_minimal()
@@ -161,18 +208,25 @@ plot_regulatory_regions <- function(gr, regulatory_gr) {
 
 #' Plot Missing Annotations
 #'
-#' @param gr GRanges object with a "feature" metadata column
+#' Creates a bar plot showing annotated vs missing intervals
+#'
+#' @param gr GRanges object with a "feature_type" metadata column
 #' @return ggplot2 barplot showing counts of annotated vs. unannotated intervals
 #' @examples
-#' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-#' gr$feature <- c("promoter", "intergenic", NA, "exon")
+#' library(GenomicRanges)
+#' gr <- GRanges(seqnames = "chr1", ranges = IRanges::IRanges(c(100, 200, 300, 400), 
+#'                                                             c(150, 250, 350, 450)))
+#' mcols(gr)$feature_type <- c("promoter", "intergenic", NA, "exon")
 #' plot_missing_annotations(gr)
+#' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal
+#' @importFrom S4Vectors mcols
+#' @importFrom rlang .data
 #' @export
 plot_missing_annotations <- function(gr) {
-  feature_status <- ifelse(is.na(GenomicRanges::mcols(gr)$feature), "Missing", "Annotated")
+  feature_status <- ifelse(is.na(S4Vectors::mcols(gr)$feature_type), "Missing", "Annotated")
   df <- data.frame(Status = feature_status)
   
-  ggplot2::ggplot(df, ggplot2::aes(x = Status, fill = Status)) +
+  ggplot2::ggplot(df, ggplot2::aes(x = .data$Status, fill = .data$Status)) +
     ggplot2::geom_bar() +
     ggplot2::labs(x = "", y = "Count", title = "Annotated vs Missing Intervals") +
     ggplot2::theme_minimal()
@@ -180,20 +234,27 @@ plot_missing_annotations <- function(gr) {
 
 #' Plot Annotation Summary
 #'
-#' @param gr GRanges object with a "feature" metadata column
+#' Creates a bar plot summarizing all feature types
+#'
+#' @param gr GRanges object with a "feature_type" metadata column
 #' @return ggplot2 barplot showing counts of intervals per feature type
 #' @examples
-#' gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-#' gr$feature <- c("promoter", "exon", "intron", "intergenic", NA)
+#' library(GenomicRanges)
+#' gr <- GRanges(seqnames = "chr1", ranges = IRanges::IRanges(c(100, 200, 300, 400, 500), 
+#'                                                             c(150, 250, 350, 450, 550)))
+#' mcols(gr)$feature_type <- c("promoter", "exon", "intron", "intergenic", NA)
 #' plot_annotation_summary(gr)
+#' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal
+#' @importFrom S4Vectors mcols
+#' @importFrom rlang .data
 #' @export
 plot_annotation_summary <- function(gr) {
-  feature_vec <- GenomicRanges::mcols(gr)$feature
+  feature_vec <- S4Vectors::mcols(gr)$feature_type
   feature_vec[is.na(feature_vec)] <- "Missing"
   
   df <- data.frame(Feature = feature_vec)
   
-  ggplot2::ggplot(df, ggplot2::aes(x = Feature, fill = Feature)) +
+  ggplot2::ggplot(df, ggplot2::aes(x = .data$Feature, fill = .data$Feature)) +
     ggplot2::geom_bar() +
     ggplot2::labs(x = "Feature Type", y = "Count", title = "Annotation Summary") +
     ggplot2::theme_minimal()
