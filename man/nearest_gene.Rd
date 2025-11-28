@@ -19,9 +19,13 @@ For each genomic interval, this function identifies the nearest gene and calcula
 from the interval to the gene
 }
 \examples{
+\dontrun{
+# Requires TxDb.Hsapiens.UCSC.hg19.knownGene (not available on all systems)
 library(GenomicRanges)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 gr <- GRanges(seqnames = "chr1", ranges = IRanges(100000, 101000))
-nearest_gene(gr, txdb)
+gr_annotated <- annotate_regions(gr, txdb)
+nearest_gene(gr_annotated, txdb)
+}
 }

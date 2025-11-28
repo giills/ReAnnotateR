@@ -15,11 +15,13 @@ convert_coordinates(gr, chain_file)
 A `GRanges` object with coordinates lifted over to the new assembly
 }
 \description{
-Convert genomic coordinates between assemblies
+Uses a chain file to lift genomic coordinates from one reference assembly to another
 }
 \examples{
 bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
-gr <- read_bed(bed_file)
 chain_file <- system.file("extdata", "hg19ToHg38.over.chain", package = "ReAnnotateR")
-gr_new <- convert_coordinates(gr, chain_file)
+if (file.exists(bed_file) && file.exists(chain_file)) {
+  gr <- read_bed(bed_file)
+  gr_new <- convert_coordinates(gr, chain_file)
+}
 }

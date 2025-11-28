@@ -7,16 +7,18 @@
 plot_annotation_summary(gr)
 }
 \arguments{
-\item{gr}{GRanges object with a "feature" metadata column}
+\item{gr}{GRanges object with a "feature_type" metadata column}
 }
 \value{
 ggplot2 barplot showing counts of intervals per feature type
 }
 \description{
-Plot Annotation Summary
+Creates a bar plot summarizing all feature types
 }
 \examples{
-gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-gr$feature <- c("promoter", "exon", "intron", "intergenic", NA)
+library(GenomicRanges)
+gr <- GRanges(seqnames = "chr1", ranges = IRanges::IRanges(c(100, 200, 300, 400, 500), 
+                                                            c(150, 250, 350, 450, 550)))
+mcols(gr)$feature_type <- c("promoter", "exon", "intron", "intergenic", NA)
 plot_annotation_summary(gr)
 }

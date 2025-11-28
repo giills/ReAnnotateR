@@ -7,7 +7,7 @@
 plot_enrichment(enrich_result, top_n = 10)
 }
 \arguments{
-\item{enrich_result}{Object returned from functional_terms()}
+\item{enrich_result}{Data frame or enrichment result object returned from functional_terms()}
 
 \item{top_n}{Integer, number of top terms to plot (default 10)}
 }
@@ -15,10 +15,13 @@ plot_enrichment(enrich_result, top_n = 10)
 ggplot2 object showing enrichment scores for top terms
 }
 \description{
-Plot Functional Enrichment Results
+Creates a bar plot of the top enriched terms
 }
 \examples{
-gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-enrich_res <- functional_terms(gr)
-plot_enrichment(enrich_res)
+\dontrun{
+bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+gr <- read_bed(bed_file)
+enrich_res <- functional_terms(gr, org.Hs.eg.db)
+plot_enrichment(enrich_res$go)
+}
 }

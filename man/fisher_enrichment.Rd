@@ -2,14 +2,14 @@
 % Please edit documentation in R/annotation_functions.R
 \name{fisher_enrichment}
 \alias{fisher_enrichment}
-\title{Perform Fisher's exact test for enrichment!}
+\title{Perform Fisher's exact test for enrichment}
 \usage{
 fisher_enrichment(gr, category, background_gr)
 }
 \arguments{
-\item{gr}{GRanges object with a metadata column of categories (like feature)}
+\item{gr}{GRanges object with a metadata column 'feature_type' of categories}
 
-\item{category}{A character string specifying which category to test for enrichment. Valid options can be any value present in the metadata column. So, if using the 'feature' column, valid options are: "promoter", "exon", "intron", "intergenic".}
+\item{category}{A character string specifying which category to test for enrichment. Valid options can be any value present in the metadata column. So, if using the 'feature_type' column, valid options are: "promoter", "exon", "intron", "intergenic".}
 
 \item{background_gr}{A GRanges object representing the background set of regions.}
 }
@@ -22,8 +22,8 @@ Performs a Fisher's exact test to see if a category (like a promoter) is overrep
 \examples{
 library(GenomicRanges)
 gr <- GRanges(seqnames = "chr1", ranges = IRanges(c(100,200), c(150,250)))
-mcols(gr)$feature <- c("promoter", "exon")
+mcols(gr)$feature_type <- c("promoter", "exon")
 bg_gr <- GRanges(seqnames = "chr1", ranges = IRanges(c(50,150,250), c(120,220,300)))
-mcols(bg_gr)$feature <- c("promoter", "exon", "intron")
+mcols(bg_gr)$feature_type <- c("promoter", "exon", "intron")
 fisher_enrichment(gr, "promoter", bg_gr)
 }

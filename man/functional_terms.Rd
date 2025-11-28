@@ -23,12 +23,12 @@ For each gene associated with genomic intervals, retrieve functional
 information
 }
 \examples{
+\dontrun{
 library(GenomicRanges)
 library(clusterProfiler)
 library(org.Hs.eg.db)
 gr <- GRanges(seqnames = "chr1", ranges = IRanges::IRanges(100000, 101000))
 GenomicRanges::mcols(gr)$nearest_gene <- "1"
-# Note: Running this example requires a valid OrgDb object like org.Hs.eg.db
-# functional_terms(gr, org.Hs.eg.db)
-
+functional_terms(gr, org.Hs.eg.db)
+}
 }

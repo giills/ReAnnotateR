@@ -14,12 +14,15 @@ plot_ideogram(gr, genome = "hg38", chromosomes = NULL)
 \item{chromosomes}{Character vector of chromosomes to plot (default all)}
 }
 \value{
-Gviz plot displaying intervals on chromosome ideograms
+NULL (plots are created as side effect)
 }
 \description{
-Plot Chromosome Ideogram with Intervals
+Creates an ideogram visualization showing intervals on chromosomes
 }
 \examples{
-gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
+\dontrun{
+bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+gr <- read_bed(bed_file)
 plot_ideogram(gr)
+}
 }

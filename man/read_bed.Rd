@@ -2,7 +2,7 @@
 % Please edit documentation in R/io_functions.R
 \name{read_bed}
 \alias{read_bed}
-\title{Get a GRanges object from a BED file}
+\title{Read BED file into GRanges object}
 \usage{
 read_bed(file)
 }
@@ -13,10 +13,12 @@ read_bed(file)
 `GRanges` object containing the intervals from the BED file
 }
 \description{
-Checks for invalid chromosome start and end positions
+Loads a BED file and converts it to a GRanges object.
+Checks for invalid chromosome start and end positions.
 }
 \examples{
-data(example_bed)
 bed_path <- system.file("extdata", "example.bed", package = "ReAnnotateR")
-gr <- read_bed(bed_path)
+if (file.exists(bed_path)) {
+  gr <- read_bed(bed_path)
+}
 }

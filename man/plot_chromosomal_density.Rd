@@ -15,9 +15,12 @@ plot_chromosomal_density(gr, bin_size = 1e+06)
 ggplot2 object showing number of intervals per bin along each chromosome
 }
 \description{
-Plot Chromosomal Density of Genomic Intervals
+Creates a line plot showing the density of intervals across chromosomes
 }
 \examples{
-gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-plot_chromosomal_density(gr)
+bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+if (file.exists(bed_file)) {
+  gr <- read_bed(bed_file)
+  plot_chromosomal_density(gr)
+}
 }

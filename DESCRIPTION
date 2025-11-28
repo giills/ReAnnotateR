@@ -21,7 +21,9 @@ Imports:
     ggplot2,
     clusterProfiler,
     methods,
-    rlang
+    rlang,
+    shiny,
+    DT
 Suggests:
   testthat (>= 3.0.0),
     knitr,

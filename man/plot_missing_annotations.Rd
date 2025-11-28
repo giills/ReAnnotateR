@@ -7,16 +7,18 @@
 plot_missing_annotations(gr)
 }
 \arguments{
-\item{gr}{GRanges object with a "feature" metadata column}
+\item{gr}{GRanges object with a "feature_type" metadata column}
 }
 \value{
 ggplot2 barplot showing counts of annotated vs. unannotated intervals
 }
 \description{
-Plot Missing Annotations
+Creates a bar plot showing annotated vs missing intervals
 }
 \examples{
-gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-gr$feature <- c("promoter", "intergenic", NA, "exon")
+library(GenomicRanges)
+gr <- GRanges(seqnames = "chr1", ranges = IRanges::IRanges(c(100, 200, 300, 400), 
+                                                            c(150, 250, 350, 450)))
+mcols(gr)$feature_type <- c("promoter", "intergenic", NA, "exon")
 plot_missing_annotations(gr)
 }

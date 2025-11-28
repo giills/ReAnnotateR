@@ -15,9 +15,13 @@ plot_regulatory_regions(gr, regulatory_gr)
 ggplot2 object showing which intervals overlap regulatory regions
 }
 \description{
-Plot Regulatory Regions Overlaps
+Creates a bar plot showing overlaps with regulatory regions
 }
 \examples{
-gr <- read_bed(system.file("extdata", "example.bed", package = "ReAnnotateR"))
-plot_regulatory_regions(gr, regulatory_gr)
+\dontrun{
+bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
+gr <- read_bed(bed_file)
+# regulatory_gr would be loaded from a data source
+# plot_regulatory_regions(gr, regulatory_gr)
+}
 }
