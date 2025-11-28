@@ -82,19 +82,33 @@ ui <- fluidPage(
         
         tabPanel("Feature Composition",
                  h3("Genomic Feature Distribution"),
+                 p("This plot shows the proportion of each genomic feature type (promoter, exon, intron, intergenic) in your dataset."),
                  plotOutput("feature_plot", height = "500px"),
                  hr(),
+                 h4("Feature Statistics"),
+                 verbatimTextOutput("feature_stats"),
+                 hr(),
+                 h4("Feature Counts"),
                  tableOutput("feature_table")
         ),
         
         tabPanel("Chromosomal Distribution",
                  h3("Density Across Chromosomes"),
-                 plotOutput("density_plot", height = "600px")
+                 p("This plot shows how your genomic intervals are distributed across different chromosomes."),
+                 uiOutput("density_message"),
+                 plotOutput("density_plot", height = "600px"),
+                 hr(),
+                 h4("Chromosome Summary"),
+                 verbatimTextOutput("chr_summary")
         ),
         
-        tabPanel("Annotation Summary",
+        tabPanel("Annotated Data",
                  h3("Complete Annotation Results"),
-                 plotOutput("summary_plot", height = "500px"),
+                 p("This shows all annotated regions including feature types. The plot indicates whether regions have missing annotations."),
+                 plotOutput("missing_plot", height = "400px"),
+                 hr(),
+                 h4("Detailed Feature Information"),
+                 verbatimTextOutput("detailed_features"),
                  hr(),
                  h4("Annotated Regions Table"),
                  DT::dataTableOutput("annotated_table")
@@ -218,13 +232,13 @@ server <- function(input, output, session) {
   # Chromosomal density plot
   output$density_plot <- renderPlot({
     req(rv$annotated_gr)
-    plot_chromosomal_density(rv$annotated_gr)
+    plot_chromosomal_density(rv$annotated_gr, bin_size = 500000)
   })
   
-  # Annotation summary plot
-  output$summary_plot <- renderPlot({
+  # Missing annotations plot (replaces summary plot)
+  output$missing_plot <- renderPlot({
     req(rv$annotated_gr)
-    plot_annotation_summary(rv$annotated_gr)
+    plot_missing_annotations(rv$annotated_gr)
   })
   
   # Annotated table
