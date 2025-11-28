@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_functions.R
 \name{plot_annotation_summary}
 \alias{plot_annotation_summary}
-\title{Plot Annotation Summary}
+\title{Summarize Annotation Completeness and Feature Distribution}
 \usage{
 plot_annotation_summary(gr)
 }
@@ -13,7 +13,11 @@ plot_annotation_summary(gr)
 ggplot2 barplot showing counts of intervals per feature type
 }
 \description{
-Creates a bar plot summarizing all feature types
+Creates a bar plot showing the count of genomic intervals in each feature
+category, including any regions that failed to annotate (marked as "Missing").
+This differs from plot_feature_composition() by highlighting annotation
+completeness. Use this to quality-check your annotation results and identify
+if any intervals could not be classified.
 }
 \examples{
 library(GenomicRanges)

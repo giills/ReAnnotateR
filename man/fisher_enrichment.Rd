@@ -2,7 +2,7 @@
 % Please edit documentation in R/annotation_functions.R
 \name{fisher_enrichment}
 \alias{fisher_enrichment}
-\title{Perform Fisher's exact test for enrichment}
+\title{Test for Statistical Enrichment of Genomic Features}
 \usage{
 fisher_enrichment(gr, category, background_gr)
 }
@@ -17,7 +17,13 @@ fisher_enrichment(gr, category, background_gr)
 A list with elements 'odds_ratio', 'p_value', and 'table' containing the contingency table, or NULL if the category is invalid
 }
 \description{
-Performs a Fisher's exact test to see if a category (like a promoter) is overrepresented among a set of genomic regions compared to a background set or not
+Performs Fisher's exact test to determine whether a specific genomic feature
+type (promoter, exon, intron, or intergenic) is statistically over-represented
+or under-represented in your dataset compared to a background set. Returns the
+odds ratio (effect size), p-value (statistical significance), and contingency
+table. An odds ratio > 1 indicates enrichment, while < 1 indicates depletion.
+This is useful for determining if your genomic intervals are biased toward
+certain functional elements.
 }
 \examples{
 library(GenomicRanges)

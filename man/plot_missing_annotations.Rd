@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_functions.R
 \name{plot_missing_annotations}
 \alias{plot_missing_annotations}
-\title{Plot Missing Annotations}
+\title{Assess Annotation Completeness}
 \usage{
 plot_missing_annotations(gr)
 }
@@ -13,7 +13,11 @@ plot_missing_annotations(gr)
 ggplot2 barplot showing counts of annotated vs. unannotated intervals
 }
 \description{
-Creates a bar plot showing annotated vs missing intervals
+Creates a simple two-bar plot comparing the number of successfully annotated
+genomic intervals versus those that failed annotation (have NA feature types).
+A high proportion of missing annotations may indicate problems with genome
+version mismatch, incorrect coordinate systems, or intervals in regions not
+covered by the annotation database (e.g., unplaced contigs).
 }
 \examples{
 library(GenomicRanges)

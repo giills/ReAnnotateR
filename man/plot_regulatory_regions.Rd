@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_functions.R
 \name{plot_regulatory_regions}
 \alias{plot_regulatory_regions}
-\title{Plot Regulatory Regions Overlaps}
+\title{Visualize Overlap with Regulatory Regions}
 \usage{
 plot_regulatory_regions(gr, regulatory_gr)
 }
@@ -15,7 +15,11 @@ plot_regulatory_regions(gr, regulatory_gr)
 ggplot2 object showing which intervals overlap regulatory regions
 }
 \description{
-Creates a bar plot showing overlaps with regulatory regions
+Creates a bar plot showing how many of your genomic intervals overlap with
+a provided set of regulatory regions (e.g., enhancers, silencers, CTCF binding
+sites). Requires a second GRanges object containing the regulatory regions of
+interest. This is useful for determining if your dataset is enriched for
+specific types of regulatory elements beyond just promoters.
 }
 \examples{
 \dontrun{

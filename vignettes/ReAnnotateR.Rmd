@@ -33,6 +33,24 @@ if (!has_txdb || !has_orgdb) {
 
 The **ReAnnotateR** package provides tools to annotate genomic intervals from BED files by linking them to genes, genomic features like promoters, exons, introns, intergenic regions, and biological functions. This vignette demonstrates a complete workflow.
 
+This package builds upon established Bioconductor infrastructure including GenomicRanges (Lawrence et al., 2013) for genomic interval manipulation, and clusterProfiler (Wu et al., 2021) for functional enrichment analysis.
+
+## References
+
+- Lawrence M, Huber W, Pagès H, Aboyoun P, Carlson M, et al. (2013) Software for Computing and Annotating Genomic Ranges. *PLoS Computational Biology* 9(8): e1003118. https://doi.org/10.1371/journal.pcbi.1003118
+
+- Wu T, Hu E, Xu S, Chen M, Guo P, Dai Z, Feng T, Zhou L, Tang W, Zhan L, Fu X, Liu S, Bo X, Yu G (2021). "clusterProfiler 4.0: A universal enrichment tool for interpreting omics data." *The Innovation*, 2(3), 100141. https://doi.org/10.1016/j.xinn.2021.100141
+
+- Wickham H (2016). *ggplot2: Elegant Graphics for Data Analysis*. Springer-Verlag New York. ISBN 978-3-319-24277-4. https://ggplot2.tidyverse.org
+
+- Kent WJ, Sugnet CW, Furey TS, Roskin KM, Pringle TH, Zahler AM, Haussler D (2002). "The human genome browser at UCSC." *Genome Research*, 12(6):996-1006. https://doi.org/10.1101/gr.229102
+
+- Fisher RA (1922). "On the interpretation of χ² from contingency tables, and the calculation of P". *Journal of the Royal Statistical Society*, 85(1): 87-94. https://doi.org/10.2307/2340521
+
+- Carlson M (2019). *TxDb.Hsapiens.UCSC.hg38.knownGene: Annotation package for TxDb object(s)*. R package version 3.10.0.
+
+- Carlson M (2019). *org.Hs.eg.db: Genome wide annotation for Human*. R package version 3.8.2.
+
 ## Installation
 
 ```{r install, eval=FALSE}
@@ -151,7 +169,7 @@ You can also enable KEGG pathway enrichment by setting `kegg = TRUE`!
 
 # Test for Feature Enrichment
 
-Compare your intervals to a background set to test if certain genomic features are enriched using Fisher's exact test.
+Compare your intervals to a background set to test if certain genomic features are enriched using Fisher's exact test (Fisher, 1922).
 
 ```{r fisher-enrichment, eval=has_txdb}
 # Create a simulated background set for demonstration
@@ -185,7 +203,7 @@ An odds ratio > 1 indicates enrichment, while < 1 indicates depletion.
 
 # Coordinate Conversion (Optional)
 
-If you need to convert coordinates between genome assemblies (e.g., hg19 to hg38):
+If you need to convert coordinates between genome assemblies (e.g., hg19 to hg38), the package uses UCSC liftOver chain files (Kent et al., 2002):
 
 ```{r convert-coords, eval=FALSE}
 # Example: Convert from hg19 to hg38
@@ -212,7 +230,7 @@ if (!is.null(enrichment_results)) {
 
 # Visualization
 
-ReAnnotateR includes several visualization functions to explore your data:
+ReAnnotateR includes several visualization functions based on ggplot2 (Wickham, 2016) to explore your data:
 
 ```{r viz-setup, eval=has_txdb, message=FALSE}
 library(ggplot2)

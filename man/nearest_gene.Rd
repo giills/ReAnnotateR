@@ -2,7 +2,7 @@
 % Please edit documentation in R/annotation_functions.R
 \name{nearest_gene}
 \alias{nearest_gene}
-\title{Find the closest gene to each genomic region}
+\title{Identify Nearest Genes and Calculate Distances}
 \usage{
 nearest_gene(gr, txdb_info)
 }
@@ -15,8 +15,13 @@ nearest_gene(gr, txdb_info)
 A GRanges object with extra metadata columns 'nearest_gene' and 'distance_to_gene'
 }
 \description{
-For each genomic interval, this function identifies the nearest gene and calculates the distance
-from the interval to the gene
+For each genomic interval, identifies the closest gene (by distance from
+interval to gene body) and calculates the genomic distance in base pairs.
+A distance of 0 indicates the interval overlaps the gene body. Positive
+distances indicate how far the interval is from the nearest gene. This
+information is crucial for linking regulatory elements to their potential
+target genes or for understanding the genomic context of your intervals.
+Must be run after annotate_regions().
 }
 \examples{
 \dontrun{

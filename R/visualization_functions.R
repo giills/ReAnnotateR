@@ -1,7 +1,11 @@
-#' Plot Feature Composition of Genomic Intervals
+#' Visualize Genomic Feature Type Distribution
 #'
-#' Creates a bar plot showing the distribution of genomic features
-#'
+#' Creates a bar plot showing the count of genomic intervals classified into
+#' each feature type: promoters, exons, introns, and intergenic regions. This
+#' provides a quick overview of which types of genomic elements your intervals
+#' predominantly overlap. For example, if most intervals fall in promoters, your
+#' dataset may be enriched for regulatory regions near transcription start sites.
+#' 
 #' @param gr GRanges object with a "feature_type" metadata column
 #' @return ggplot2 object showing feature composition as a bar plot
 #' @examples
@@ -42,10 +46,15 @@ plot_feature_composition <- function(gr) {
     ggplot2::theme(legend.position = "none")
 }
 
-#' Plot Chromosomal Density of Genomic Intervals
+#' Visualize Distribution of Genomic Intervals Across Chromosomes
 #'
-#' Creates a line plot showing the density of intervals across chromosomes
-#'
+#' Creates a multi-panel line plot showing how genomic intervals are distributed
+#' along each chromosome. The genome is divided into bins (default 1Mb), and the
+#' number of intervals in each bin is plotted. This visualization helps identify
+#' genomic regions with high clustering of intervals and can reveal patterns like
+#' enrichment near telomeres or centromeres. Each chromosome is shown in a 
+#' separate panel for easy comparison.
+#' 
 #' @param gr GRanges object containing genomic intervals
 #' @param bin_size Integer specifying bin size in base pairs (default 1e6)
 #' @return ggplot2 object showing number of intervals per bin along each chromosome
@@ -82,9 +91,12 @@ plot_chromosomal_density <- function(gr, bin_size = 1e6) {
     ggplot2::theme_minimal()
 }
 
-#' Plot Functional Enrichment Results
+#' Visualize Functional Enrichment Results
 #'
-#' Creates a bar plot of the top enriched terms
+#' Creates a horizontal bar plot displaying the top enriched biological terms
+#' from Gene Ontology (GO) or KEGG pathway analysis. The plot shows the 
+#' negative log10 of adjusted p-values, making it easy to identify the most
+#' significantly enriched terms. Longer bars indicate more significant enrichment.
 #'
 #' @param enrich_result Data frame or enrichment result object returned from functional_terms()
 #' @param top_n Integer, number of top terms to plot (default 10)
@@ -169,10 +181,14 @@ plot_ideogram <- function(gr, genome = "hg38", chromosomes = NULL) {
   return(invisible(NULL))
 }
 
-#' Plot Regulatory Regions Overlaps
+#' Visualize Overlap with Regulatory Regions
 #'
-#' Creates a bar plot showing overlaps with regulatory regions
-#'
+#' Creates a bar plot showing how many of your genomic intervals overlap with
+#' a provided set of regulatory regions (e.g., enhancers, silencers, CTCF binding
+#' sites). Requires a second GRanges object containing the regulatory regions of
+#' interest. This is useful for determining if your dataset is enriched for
+#' specific types of regulatory elements beyond just promoters.
+#' 
 #' @param gr GRanges object with your intervals
 #' @param regulatory_gr GRanges object with regulatory regions
 #' @return ggplot2 object showing which intervals overlap regulatory regions
@@ -206,10 +222,14 @@ plot_regulatory_regions <- function(gr, regulatory_gr) {
     ggplot2::theme_minimal()
 }
 
-#' Plot Missing Annotations
+#' Assess Annotation Completeness
 #'
-#' Creates a bar plot showing annotated vs missing intervals
-#'
+#' Creates a simple two-bar plot comparing the number of successfully annotated
+#' genomic intervals versus those that failed annotation (have NA feature types).
+#' A high proportion of missing annotations may indicate problems with genome
+#' version mismatch, incorrect coordinate systems, or intervals in regions not
+#' covered by the annotation database (e.g., unplaced contigs).
+#' 
 #' @param gr GRanges object with a "feature_type" metadata column
 #' @return ggplot2 barplot showing counts of annotated vs. unannotated intervals
 #' @examples
@@ -232,10 +252,14 @@ plot_missing_annotations <- function(gr) {
     ggplot2::theme_minimal()
 }
 
-#' Plot Annotation Summary
+#' Summarize Annotation Completeness and Feature Distribution
 #'
-#' Creates a bar plot summarizing all feature types
-#'
+#' Creates a bar plot showing the count of genomic intervals in each feature
+#' category, including any regions that failed to annotate (marked as "Missing").
+#' This differs from plot_feature_composition() by highlighting annotation
+#' completeness. Use this to quality-check your annotation results and identify
+#' if any intervals could not be classified.
+#' 
 #' @param gr GRanges object with a "feature_type" metadata column
 #' @return ggplot2 barplot showing counts of intervals per feature type
 #' @examples

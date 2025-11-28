@@ -2,7 +2,7 @@
 % Please edit documentation in R/io_functions.R
 \name{export_results}
 \alias{export_results}
-\title{Export annotated or enriched results}
+\title{Export Annotated Results to File}
 \usage{
 export_results(object, file, format = "tsv")
 }
@@ -17,8 +17,12 @@ export_results(object, file, format = "tsv")
 Invisible NULL
 }
 \description{
-Saves annotated genomic intervals or enrichment results to a file.
-Supports writing GRanges, data frames, or lists in TSV, CSV, or BED format
+Saves annotated genomic intervals or functional enrichment results to disk
+in multiple formats (TSV, CSV, or BED). For GRanges objects, exports include
+all metadata columns (feature types, nearest genes, distances). For enrichment
+results lists, creates separate files for GO and KEGG results. This allows you
+to share results with collaborators, import into other tools, or create
+publication-ready supplementary tables.
 }
 \examples{
 bed_path <- system.file("extdata", "example.bed", package = "ReAnnotateR")

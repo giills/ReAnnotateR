@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_functions.R
 \name{plot_chromosomal_density}
 \alias{plot_chromosomal_density}
-\title{Plot Chromosomal Density of Genomic Intervals}
+\title{Visualize Distribution of Genomic Intervals Across Chromosomes}
 \usage{
 plot_chromosomal_density(gr, bin_size = 1e+06)
 }
@@ -15,7 +15,12 @@ plot_chromosomal_density(gr, bin_size = 1e+06)
 ggplot2 object showing number of intervals per bin along each chromosome
 }
 \description{
-Creates a line plot showing the density of intervals across chromosomes
+Creates a multi-panel line plot showing how genomic intervals are distributed
+along each chromosome. The genome is divided into bins (default 1Mb), and the
+number of intervals in each bin is plotted. This visualization helps identify
+genomic regions with high clustering of intervals and can reveal patterns like
+enrichment near telomeres or centromeres. Each chromosome is shown in a 
+separate panel for easy comparison.
 }
 \examples{
 bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")

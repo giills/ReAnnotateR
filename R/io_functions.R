@@ -72,10 +72,15 @@ read_bed <- function(file) {
   return(gr)
 }
 
-#' Convert genomic coordinates between assemblies
+#' Convert Genomic Coordinates Between Genome Assemblies
 #'
-#' Uses a chain file to lift genomic coordinates from one reference assembly to another
-#'
+#' Performs liftOver to convert genomic coordinates from one reference genome 
+#' assembly to another (e.g., from hg19 to hg38). This is essential when working 
+#' with data from different genome builds or when updating analyses to newer 
+#' genome versions. Uses UCSC chain files for accurate coordinate mapping. Some 
+#' regions may not lift over if they are in areas that differ significantly 
+#' between genome builds.
+#' 
 #' @param gr a `GRanges` object
 #' @param chain_file A path to the chain file
 #' @return A `GRanges` object with coordinates lifted over to the new assembly
@@ -106,11 +111,15 @@ convert_coordinates <- function(gr, chain_file) {
   return(gr_new)
 }
 
-#' Export annotated or enriched results
+#' Export Annotated Results to File
 #'
-#' Saves annotated genomic intervals or enrichment results to a file.
-#' Supports writing GRanges, data frames, or lists in TSV, CSV, or BED format
-#'
+#' Saves annotated genomic intervals or functional enrichment results to disk
+#' in multiple formats (TSV, CSV, or BED). For GRanges objects, exports include
+#' all metadata columns (feature types, nearest genes, distances). For enrichment
+#' results lists, creates separate files for GO and KEGG results. This allows you
+#' to share results with collaborators, import into other tools, or create
+#' publication-ready supplementary tables.
+#' 
 #' @param object GRanges object, data frame, or enrichment results list
 #' @param file Path to output file
 #' @param format Output format: "tsv", "csv", or "bed" (default "tsv")

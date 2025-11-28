@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_functions.R
 \name{plot_enrichment}
 \alias{plot_enrichment}
-\title{Plot Functional Enrichment Results}
+\title{Visualize Functional Enrichment Results}
 \usage{
 plot_enrichment(enrich_result, top_n = 10)
 }
@@ -15,7 +15,10 @@ plot_enrichment(enrich_result, top_n = 10)
 ggplot2 object showing enrichment scores for top terms
 }
 \description{
-Creates a bar plot of the top enriched terms
+Creates a horizontal bar plot displaying the top enriched biological terms
+from Gene Ontology (GO) or KEGG pathway analysis. The plot shows the 
+negative log10 of adjusted p-values, making it easy to identify the most
+significantly enriched terms. Longer bars indicate more significant enrichment.
 }
 \examples{
 \dontrun{

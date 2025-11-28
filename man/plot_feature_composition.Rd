@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_functions.R
 \name{plot_feature_composition}
 \alias{plot_feature_composition}
-\title{Plot Feature Composition of Genomic Intervals}
+\title{Visualize Genomic Feature Type Distribution}
 \usage{
 plot_feature_composition(gr)
 }
@@ -13,7 +13,11 @@ plot_feature_composition(gr)
 ggplot2 object showing feature composition as a bar plot
 }
 \description{
-Creates a bar plot showing the distribution of genomic features
+Creates a bar plot showing the count of genomic intervals classified into
+each feature type: promoters, exons, introns, and intergenic regions. This
+provides a quick overview of which types of genomic elements your intervals
+predominantly overlap. For example, if most intervals fall in promoters, your
+dataset may be enriched for regulatory regions near transcription start sites.
 }
 \examples{
 \dontrun{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/io_functions.R
 \name{convert_coordinates}
 \alias{convert_coordinates}
-\title{Convert genomic coordinates between assemblies}
+\title{Convert Genomic Coordinates Between Genome Assemblies}
 \usage{
 convert_coordinates(gr, chain_file)
 }
@@ -15,7 +15,12 @@ convert_coordinates(gr, chain_file)
 A `GRanges` object with coordinates lifted over to the new assembly
 }
 \description{
-Uses a chain file to lift genomic coordinates from one reference assembly to another
+Performs liftOver to convert genomic coordinates from one reference genome 
+assembly to another (e.g., from hg19 to hg38). This is essential when working 
+with data from different genome builds or when updating analyses to newer 
+genome versions. Uses UCSC chain files for accurate coordinate mapping. Some 
+regions may not lift over if they are in areas that differ significantly 
+between genome builds.
 }
 \examples{
 bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")

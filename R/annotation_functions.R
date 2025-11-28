@@ -55,11 +55,16 @@ annotate_regions <- function(gr, txdb_info, promoter_up = 3000, promoter_down = 
 }
 
 
-#' Find the closest gene to each genomic region
+#' Identify Nearest Genes and Calculate Distances
 #'
-#' For each genomic interval, this function identifies the nearest gene and calculates the distance
-#' from the interval to the gene
-#'
+#' For each genomic interval, identifies the closest gene (by distance from
+#' interval to gene body) and calculates the genomic distance in base pairs.
+#' A distance of 0 indicates the interval overlaps the gene body. Positive
+#' distances indicate how far the interval is from the nearest gene. This
+#' information is crucial for linking regulatory elements to their potential
+#' target genes or for understanding the genomic context of your intervals.
+#' Must be run after annotate_regions().
+#' 
 #' @param gr GRanges object of genomic regions
 #' @param txdb_info A TxDb object with gene coordinates on a certain reference genome
 #' @return A GRanges object with extra metadata columns 'nearest_gene' and 'distance_to_gene'
@@ -153,10 +158,16 @@ functional_terms <- function(gr, orgdb, go = TRUE, kegg = FALSE) {
 }
 
 
-#' Perform Fisher's exact test for enrichment
+#' Test for Statistical Enrichment of Genomic Features
 #'
-#' Performs a Fisher's exact test to see if a category (like a promoter) is overrepresented among a set of genomic regions compared to a background set or not
-#'
+#' Performs Fisher's exact test to determine whether a specific genomic feature
+#' type (promoter, exon, intron, or intergenic) is statistically over-represented
+#' or under-represented in your dataset compared to a background set. Returns the
+#' odds ratio (effect size), p-value (statistical significance), and contingency
+#' table. An odds ratio > 1 indicates enrichment, while < 1 indicates depletion.
+#' This is useful for determining if your genomic intervals are biased toward
+#' certain functional elements.
+#' 
 #' @param gr GRanges object with a metadata column 'feature_type' of categories
 #' @param category A character string specifying which category to test for enrichment. Valid options can be any value present in the metadata column. So, if using the 'feature_type' column, valid options are: "promoter", "exon", "intron", "intergenic".
 #' @param background_gr A GRanges object representing the background set of regions.
