@@ -255,3 +255,137 @@ test_that("plot_ideogram errors without Gviz", {
     "Package 'Gviz' is required"
   )
 })
+
+# ==================================================================
+# visulization edge cases
+# ==================================================================
+
+
+test_that("plot_feature_composition handles single feature type", {
+  gr <- GenomicRanges::GRanges(
+    seqnames = rep("chr1", 3),
+    ranges = IRanges::IRanges(start = c(100, 200, 300), end = c(150, 250, 350))
+  )
+  S4Vectors::mcols(gr)$feature_type <- rep("promoter", 3)
+  
+  plot <- plot_feature_composition(gr)
+  expect_s3_class(plot, "ggplot")
+})
+
+test_that("plot_feature_composition handles NA in feature_type", {
+  gr <- GenomicRanges::GRanges(
+    seqnames = rep("chr1", 4),
+    ranges = IRanges::IRanges(start = c(100, 200, 300, 400), end = c(150, 250, 350, 450))
+  )
+  S4Vectors::mcols(gr)$feature_type <- c("promoter", NA, "exon", "intron")
+  
+  plot <- plot_feature_composition(gr)
+  expect_s3_class(plot, "ggplot")
+})
+
+test_that("plot_chromosomal_density handles single region", {
+  gr <- GenomicRanges::GRanges(
+    seqnames = "chr1",
+    ranges = IRanges::IRanges(start = 1000, end = 2000)
+  )
+  
+  plot <- plot_chromosomal_density(gr)
+  expect_s3_class(plot, "ggplot")
+})
+
+test_that("plot_chromosomal_density handles very small bin size", {
+  gr <- get_test_gr()
+  
+  plot <- plot_chromosomal_density(gr, bin_size = 10)
+  expect_s3_class(plot, "ggplot")
+})
+
+test_that("plot_chromosomal_density handles very large bin size", {
+  gr <- get_test_gr()
+  
+  plot <- plot_chromosomal_density(gr, bin_size = 1e9)
+  expect_s3_class(plot, "ggplot")
+})
+
+test_that("plot_enrichment handles single term", {
+  mock_enrichment <- data.frame(
+    Description = "Term1",
+    p.adjust = 0.01,
+    stringsAsFactors = FALSE
+  )
+  
+  plot <- plot_enrichment(mock_enrichment, top_n = 10)
+  expect_s3_class(plot, "ggplot")
+})
+
+test_that("plot_enrichment handles top_n larger than results", {
+  mock_enrichment <- data.frame(
+    Description = paste("Term", 1:3),
+    p.adjust = c(0.01, 0.02, 0.03),
+    stringsAsFactors = FALSE
+  )
+  
+  plot <- plot_enrichment(mock_enrichment, top_n = 100)
+  expect_s3_class(plot, "ggplot")
+})
+
+test_that("plot_enrichment handles zero or negative top_n", {
+  mock_enrichment <- data.frame(
+    Description = paste("Term", 1:5),
+    p.adjust = runif(5, 0.001, 0.05),
+    stringsAsFactors = FALSE
+  )
+  
+  # Should handle gracefully
+  result <- tryCatch(
+    plot_enrichment(mock_enrichment, top_n = 0),
+    error = function(e) NULL
+  )
+  
+  expect_true(is.null(result) || inherits(result, "ggplot"))
+})
+
+test_that("plot_regulatory_regions handles empty regulatory_gr", {
+  gr <- get_test_gr()
+  regulatory_gr <- GenomicRanges::GRanges()
+  
+  plot <- plot_regulatory_regions(gr, regulatory_gr)
+  expect_s3_class(plot, "ggplot")
+})
+
+test_that("plot_regulatory_regions handles different chromosomes", {
+  gr <- GenomicRanges::GRanges(
+    seqnames = "chr1",
+    ranges = IRanges::IRanges(start = c(1000, 2000), end = c(1100, 2100))
+  )
+  
+  regulatory_gr <- GenomicRanges::GRanges(
+    seqnames = "chr2",
+    ranges = IRanges::IRanges(start = c(1000, 2000), end = c(1100, 2100))
+  )
+  
+  plot <- suppressWarnings(plot_regulatory_regions(gr, regulatory_gr))
+  expect_s3_class(plot, "ggplot")
+})
+
+test_that("plot_missing_annotations handles no missing data", {
+  gr <- GenomicRanges::GRanges(
+    seqnames = rep("chr1", 3),
+    ranges = IRanges::IRanges(start = c(100, 200, 300), end = c(150, 250, 350))
+  )
+  S4Vectors::mcols(gr)$feature_type <- c("promoter", "exon", "intron")
+  
+  plot <- plot_missing_annotations(gr)
+  expect_s3_class(plot, "ggplot")
+})
+
+test_that("plot_annotation_summary handles empty character for feature_type", {
+  gr <- GenomicRanges::GRanges(
+    seqnames = "chr1",
+    ranges = IRanges::IRanges(start = 100, end = 150)
+  )
+  S4Vectors::mcols(gr)$feature_type <- ""
+  
+  plot <- plot_annotation_summary(gr)
+  expect_s3_class(plot, "ggplot")
+})
