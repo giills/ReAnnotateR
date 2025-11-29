@@ -40,7 +40,7 @@ shiny::runApp(system.file("shiny-scripts", package = "ReAnnotateR"))
 
 ## Workflow Overview
 
-![ReAnnotateR Workflow](workflow.png)
+![ReAnnotateR Workflow](inst/figures/workflow.png)
 
 ReAnnotateR provides functions organized into three main categories:
 
