@@ -90,16 +90,3 @@ R Core Team (2023). R: A language and environment for statistical computing. R F
 ## Acknowledgements
 
 This package was developed as part of an assessment for 2025 BCB410H: Applied Bioinformatics course at the University of Toronto, Toronto, CANADA. Submit any issues at https://github.com/giills/ReAnnotateR/issues. 
-
-## Package Structure
-```
-ReAnnotateR/
-├── R/                          # R functions
-├── data/                       # Example data
-├── man/                        # Documentation files from ROxygen
-├── tests/
-│   └── testthat/              # Unit tests
-├── vignettes/                 # Tutorials
-├── DESCRIPTION                # Package description
-└── NAMESPACE                  # Package namespace
-```
