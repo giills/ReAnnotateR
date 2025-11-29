@@ -107,5 +107,6 @@ Kent, W. J., Sugnet, C. W., Furey, T. S., Roskin, K. M., Pringle, T. H., Zahler,
 R Core Team (2023). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. https://www.R-project.org/
 
 ## Acknowledgements
+The author would like to thank Jack Zhu for providing the opportunity for macOS testing.
 
 This package was developed as part of an assessment for 2025 BCB410H: Applied Bioinformatics course at the University of Toronto, Toronto, CANADA. Submit any issues at https://github.com/giills/ReAnnotateR/issues. 
