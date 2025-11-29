@@ -19,6 +19,19 @@
 #' @export
 annotate_regions <- function(gr, txdb_info, promoter_up = 3000, promoter_down = 3000) {
   
+  # Validate inputs
+  if (!inherits(gr, "GRanges")) {
+    stop("gr must be a GRanges object")
+  }
+  
+  if (is.null(txdb_info)) {
+    stop("txdb_info cannot be NULL")
+  }
+  
+  if (promoter_up < 0 || promoter_down < 0) {
+    stop("promoter_up and promoter_down must be non-negative")
+  }
+  
   promoters <- GenomicFeatures::promoters(txdb_info, upstream = promoter_up, downstream = promoter_down)
   exons <- GenomicFeatures::exons(txdb_info)
   introns_list <- GenomicFeatures::intronsByTranscript(txdb_info)
@@ -54,7 +67,6 @@ annotate_regions <- function(gr, txdb_info, promoter_up = 3000, promoter_down = 
   return(gr)
 }
 
-
 #' Identify Nearest Genes and Calculate Distances
 #'
 #' For each genomic interval, identifies the closest gene (by distance from
@@ -87,6 +99,10 @@ nearest_gene <- function(gr, txdb_info) {
     stop("Input GRanges object must contain columns added by annotate_regions().")
   }
   
+  if (is.null(txdb_info)) {
+    stop("txdb_info cannot be NULL")
+  }
+  
   all_genes_list <- GenomicFeatures::genes(txdb_info, single.strand.genes.only = FALSE)
   all_genes <- unlist(all_genes_list)
   
@@ -99,7 +115,6 @@ nearest_gene <- function(gr, txdb_info) {
   S4Vectors::mcols(gr)$distance_to_gene <- distances
   return(gr)
 }
-
 
 #' Retrieve functional annotations for genes
 #'
@@ -125,6 +140,10 @@ nearest_gene <- function(gr, txdb_info) {
 #' @importFrom S4Vectors mcols
 #' @export
 functional_terms <- function(gr, orgdb, go = TRUE, kegg = FALSE) {
+  if (is.null(orgdb)) {
+    stop("orgdb cannot be NULL")
+  }
+  
   genes <- as.character(S4Vectors::mcols(gr)$nearest_gene)
   genes <- stats::na.omit(genes)
   
@@ -157,7 +176,6 @@ functional_terms <- function(gr, orgdb, go = TRUE, kegg = FALSE) {
   return(results)
 }
 
-
 #' Test for Statistical Enrichment of Genomic Features
 #'
 #' Performs Fisher's exact test to determine whether a specific genomic feature
@@ -184,6 +202,23 @@ functional_terms <- function(gr, orgdb, go = TRUE, kegg = FALSE) {
 #' @export
 fisher_enrichment <- function(gr, category, background_gr) {
   
+  # Validate inputs
+  if (is.null(category) || !is.character(category)) {
+    stop("category must be a character string")
+  }
+  
+  if (length(background_gr) == 0) {
+    stop("background_gr cannot be empty")
+  }
+  
+  if (!("feature_type" %in% names(S4Vectors::mcols(gr)))) {
+    stop("gr must have a 'feature_type' metadata column")
+  }
+  
+  if (!("feature_type" %in% names(S4Vectors::mcols(background_gr)))) {
+    stop("background_gr must have a 'feature_type' metadata column")
+  }
+  
   gr_feature <- as.character(S4Vectors::mcols(gr)$feature_type)
   bg_feature <- as.character(S4Vectors::mcols(background_gr)$feature_type)
   
@@ -194,11 +229,15 @@ fisher_enrichment <- function(gr, category, background_gr) {
     return(NULL)
   }
   
+  # Calculate counts - background should NOT include the target regions
   in_category <- sum(gr_feature == category)
   not_in_category <- sum(gr_feature != category)
-  bg_in_category <- sum(bg_feature == category) - in_category
-  bg_not_in_category <- sum(bg_feature != category) - not_in_category
   
+  # Background counts should be independent of target
+  bg_in_category <- sum(bg_feature == category)
+  bg_not_in_category <- sum(bg_feature != category)
+  
+  # Create contingency table
   contingency_table <- matrix(
     c(in_category, not_in_category, bg_in_category, bg_not_in_category),
     nrow = 2,
@@ -209,7 +248,22 @@ fisher_enrichment <- function(gr, category, background_gr) {
     )
   )
   
-  test <- stats::fisher.test(contingency_table)
+  # Validate contingency table
+  if (any(contingency_table < 0)) {
+    message("Contingency table contains negative values")
+    return(NULL)
+  }
+  
+  test <- tryCatch({
+    stats::fisher.test(contingency_table)
+  }, error = function(e) {
+    message("Fisher's exact test failed: ", e$message)
+    return(NULL)
+  })
+  
+  if (is.null(test)) {
+    return(NULL)
+  }
   
   result <- list(
     odds_ratio = test$estimate,

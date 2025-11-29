@@ -25,12 +25,23 @@ read_bed <- function(file) {
     return(NULL)
   }
   
-  tryCatch({
-    bed_data <- utils::read.table(file, header = FALSE, stringsAsFactors = FALSE)
+  bed_data <- tryCatch({
+    utils::read.table(file, header = FALSE, stringsAsFactors = FALSE)
   }, error = function(e) {
     message("Error reading BED file: ", e$message)
     return(NULL)
   })
+  
+  # Check if read failed
+  if (is.null(bed_data)) {
+    return(NULL)
+  }
+  
+  # Check if file is empty
+  if (nrow(bed_data) == 0) {
+    message("BED file is empty")
+    return(NULL)
+  }
   
   n_cols <- ncol(bed_data)
   
@@ -39,12 +50,45 @@ read_bed <- function(file) {
     return(NULL)
   }
   
-  gr <- GenomicRanges::GRanges(
-    seqnames = bed_data[, 1],
-    ranges = IRanges::IRanges(start = as.numeric(bed_data[, 2]) + 1,
-                              end = as.numeric(bed_data[, 3]))
-  )
+  # Check for non-numeric coordinates
+  start_coords <- suppressWarnings(as.numeric(bed_data[, 2]))
+  end_coords <- suppressWarnings(as.numeric(bed_data[, 3]))
   
+  if (any(is.na(start_coords)) || any(is.na(end_coords))) {
+    message("Start and end coordinates must be numeric")
+    return(NULL)
+  }
+  
+  # Convert from 0-based to 1-based coordinates
+  start_coords <- start_coords + 1
+  
+  # Check for invalid coordinates before creating GRanges
+  if (any(start_coords < 1)) {
+    message("All start positions must be >= 1")
+    return(NULL)
+  }
+  
+  if (any(end_coords < start_coords)) {
+    message("All end positions must be >= start positions")
+    return(NULL)
+  }
+  
+  # Create GRanges object with validated coordinates
+  gr <- tryCatch({
+    GenomicRanges::GRanges(
+      seqnames = bed_data[, 1],
+      ranges = IRanges::IRanges(start = start_coords, end = end_coords)
+    )
+  }, error = function(e) {
+    message("Error creating GRanges object: ", e$message)
+    return(NULL)
+  })
+  
+  if (is.null(gr)) {
+    return(NULL)
+  }
+  
+  # Add optional columns
   if (n_cols >= 4) {
     S4Vectors::mcols(gr)$name <- bed_data[, 4]
   }
@@ -52,21 +96,13 @@ read_bed <- function(file) {
     S4Vectors::mcols(gr)$score <- as.numeric(bed_data[, 5])
   }
   if (n_cols >= 6) {
-    GenomicRanges::strand(gr) <- bed_data[, 6]
-  }
-  
-  for (i in seq_along(GenomicRanges::start(gr))) {
-    if (GenomicRanges::start(gr)[i] < 1) {
-      message("All start positions must be >= 1")
+    # Validate strand values
+    strand_values <- bed_data[, 6]
+    if (!all(strand_values %in% c("+", "-", "*"))) {
+      message("Invalid strand values detected. Strand must be '+', '-', or '*'")
       return(NULL)
     }
-  }
-  
-  for (i in seq_along(GenomicRanges::start(gr))) {
-    if (GenomicRanges::end(gr)[i] < GenomicRanges::start(gr)[i]) {
-      message("All end positions must be >= start positions")
-      return(NULL)
-    }
+    GenomicRanges::strand(gr) <- strand_values
   }
   
   return(gr)
@@ -95,8 +131,15 @@ read_bed <- function(file) {
 #' @export
 convert_coordinates <- function(gr, chain_file) {
   if (!inherits(gr, "GRanges")) {
-    message("gr must be a GRanges object")
-    return(NULL)
+    stop("gr must be a GRanges object")
+  }
+  
+  if (is.null(chain_file)) {
+    stop("chain_file cannot be NULL")
+  }
+  
+  if (!is.character(chain_file)) {
+    stop("chain_file must be a character string path")
   }
   
   if (!file.exists(chain_file)) {
@@ -104,7 +147,17 @@ convert_coordinates <- function(gr, chain_file) {
     return(NULL)
   }
   
-  chain <- rtracklayer::import.chain(chain_file)
+  chain <- tryCatch({
+    rtracklayer::import.chain(chain_file)
+  }, error = function(e) {
+    message("Error reading chain file: ", e$message)
+    return(NULL)
+  })
+  
+  if (is.null(chain)) {
+    return(NULL)
+  }
+  
   gr_new_list <- rtracklayer::liftOver(gr, chain)
   gr_new <- unlist(gr_new_list)
   
@@ -166,18 +219,35 @@ export_results <- function(object, file, format = "tsv") {
         strand = as.character(GenomicRanges::strand(object))
       )
       
+      # Handle metadata columns - convert complex types
       if (ncol(S4Vectors::mcols(object)) > 0) {
         mcols_df <- as.data.frame(S4Vectors::mcols(object))
+        
+        # Convert list columns to character representation
+        for (col in names(mcols_df)) {
+          if (is.list(mcols_df[[col]])) {
+            mcols_df[[col]] <- sapply(mcols_df[[col]], function(x) {
+              if (is.null(x)) return(NA_character_)
+              paste(as.character(x), collapse = ",")
+            })
+          }
+        }
+        
         df <- cbind(df, mcols_df)
       }
       
-      if (format == "tsv") {
-        utils::write.table(df, file, sep = "\t", row.names = FALSE, quote = FALSE)
-        message("Successfully exported GRanges to TSV: ", file)
-      } else {
-        utils::write.csv(df, file, row.names = FALSE)
-        message("Successfully exported GRanges to CSV: ", file)
-      }
+      tryCatch({
+        if (format == "tsv") {
+          utils::write.table(df, file, sep = "\t", row.names = FALSE, quote = FALSE)
+          message("Successfully exported GRanges to TSV: ", file)
+        } else {
+          utils::write.csv(df, file, row.names = FALSE)
+          message("Successfully exported GRanges to CSV: ", file)
+        }
+      }, error = function(e) {
+        message("Error writing file: ", e$message)
+        return(invisible(NULL))
+      })
     }
     
   } else if (is.data.frame(object)) {
