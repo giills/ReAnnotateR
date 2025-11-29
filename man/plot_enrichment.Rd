@@ -12,19 +12,58 @@ plot_enrichment(enrich_result, top_n = 10)
 \item{top_n}{Integer, number of top terms to plot (default 10)}
 }
 \value{
-ggplot2 object showing enrichment scores for top terms
+ggplot2 object showing enrichment scores for top terms, or NULL if no results
 }
 \description{
 Creates a horizontal bar plot displaying the top enriched biological terms
 from Gene Ontology (GO) or KEGG pathway analysis. The plot shows the 
 negative log10 of adjusted p-values, making it easy to identify the most
 significantly enriched terms. Longer bars indicate more significant enrichment.
+Returns a ggplot2 object that can be further customized or saved.
 }
 \examples{
 \dontrun{
+# Example 1: Basic usage with actual enrichment results
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(org.Hs.eg.db)
+
+# Load BED file and annotate
 bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
 gr <- read_bed(bed_file)
-enrich_res <- functional_terms(gr, org.Hs.eg.db)
-plot_enrichment(enrich_res$go)
+txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+gr_annotated <- annotate_regions(gr, txdb)
+gr_with_genes <- nearest_gene(gr_annotated, txdb)
+
+# Perform enrichment analysis
+enrich_res <- functional_terms(gr_with_genes, org.Hs.eg.db, go = TRUE)
+
+# Plot GO enrichment results
+if (!is.null(enrich_res$go) && nrow(enrich_res$go) > 0) {
+  p <- plot_enrichment(enrich_res$go, top_n = 10)
+  print(p)
+  
+  # Save plot
+  ggplot2::ggsave("enrichment.png", plot = p, width = 8, height = 6)
+} else {
+  message("No significant enrichment found")
 }
+}
+
+# Example 2: Simulated enrichment results for demonstration
+# This shows what the plot looks like when enrichment is detected
+simulated_results <- data.frame(
+  Description = c("DNA repair", "cell cycle", "apoptosis", 
+                  "signal transduction", "transcription"),
+  p.adjust = c(0.001, 0.005, 0.01, 0.02, 0.04),
+  Count = c(25, 20, 15, 12, 10),
+  GeneRatio = c("25/100", "20/100", "15/100", "12/100", "10/100")
+)
+p <- plot_enrichment(simulated_results, top_n = 5)
+print(p)
+
+# Example 3: Customize the plot
+p + ggplot2::labs(title = "My Custom Title") + 
+    ggplot2::theme_bw() +
+    ggplot2::theme(text = ggplot2::element_text(size = 12))
+
 }

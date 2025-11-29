@@ -18,11 +18,23 @@ category, including any regions that failed to annotate (marked as "Missing").
 This differs from plot_feature_composition() by highlighting annotation
 completeness. Use this to quality-check your annotation results and identify
 if any intervals could not be classified.
+Returns a ggplot2 object that can be further customized or saved.
 }
 \examples{
 library(GenomicRanges)
 gr <- GRanges(seqnames = "chr1", ranges = IRanges::IRanges(c(100, 200, 300, 400, 500), 
                                                             c(150, 250, 350, 450, 550)))
 mcols(gr)$feature_type <- c("promoter", "exon", "intron", "intergenic", NA)
-plot_annotation_summary(gr)
+
+# Display plot
+p <- plot_annotation_summary(gr)
+print(p)
+
+# Customize colors and theme
+p + ggplot2::scale_fill_brewer(palette = "Set2") +
+    ggplot2::theme_classic()
+
+# Save plot
+ggplot2::ggsave("annotation_summary.png", plot = p, width = 7, height = 5)
+
 }

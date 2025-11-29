@@ -10,7 +10,7 @@ plot_feature_composition(gr)
 \item{gr}{GRanges object with a "feature_type" metadata column}
 }
 \value{
-ggplot2 object showing feature composition as a bar plot
+ggplot2 object showing feature composition as a bar plot, or NULL if column missing
 }
 \description{
 Creates a bar plot showing the count of genomic intervals classified into
@@ -18,6 +18,7 @@ each feature type: promoters, exons, introns, and intergenic regions. This
 provides a quick overview of which types of genomic elements your intervals
 predominantly overlap. For example, if most intervals fall in promoters, your
 dataset may be enriched for regulatory regions near transcription start sites.
+Returns a ggplot2 object that can be further customized or saved.
 }
 \examples{
 \dontrun{
@@ -26,6 +27,16 @@ bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
 gr <- read_bed(bed_file)
 txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
 gr_annotated <- annotate_regions(gr, txdb)
-plot_feature_composition(gr_annotated)
+
+# Display plot
+p <- plot_feature_composition(gr_annotated)
+print(p)
+
+# Customize plot
+p + ggplot2::labs(title = "Custom Title") +
+    ggplot2::theme_bw()
+
+# Save plot
+ggplot2::ggsave("features.png", plot = p, width = 7, height = 5)
 }
 }

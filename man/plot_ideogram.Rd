@@ -14,15 +14,27 @@ plot_ideogram(gr, genome = "hg38", chromosomes = NULL)
 \item{chromosomes}{Character vector of chromosomes to plot (default all)}
 }
 \value{
-NULL (plots are created as side effect)
+NULL invisibly (plots are created as side effect)
 }
 \description{
-Creates an ideogram visualization showing intervals on chromosomes
+Creates an ideogram visualization showing intervals on chromosomes using Gviz.
+Note: This function creates plots as a side effect and returns NULL invisibly.
+To save plots, use a graphics device (e.g., png(), pdf()) before calling.
 }
 \examples{
 \dontrun{
 bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
 gr <- read_bed(bed_file)
+
+# Display ideograms for all chromosomes
 plot_ideogram(gr)
+
+# Plot specific chromosomes
+plot_ideogram(gr, chromosomes = c("chr1", "chr2"))
+
+# Save to file
+png("ideogram.png", width = 800, height = 600)
+plot_ideogram(gr, chromosomes = "chr1")
+dev.off()
 }
 }

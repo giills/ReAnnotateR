@@ -20,12 +20,24 @@ a provided set of regulatory regions (e.g., enhancers, silencers, CTCF binding
 sites). Requires a second GRanges object containing the regulatory regions of
 interest. This is useful for determining if your dataset is enriched for
 specific types of regulatory elements beyond just promoters.
+Returns a ggplot2 object that can be further customized or saved.
 }
 \examples{
 \dontrun{
 bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
 gr <- read_bed(bed_file)
-# regulatory_gr would be loaded from a data source
-# plot_regulatory_regions(gr, regulatory_gr)
+
+# Create example regulatory regions
+regulatory_gr <- GenomicRanges::GRanges(
+  seqnames = "chr1",
+  ranges = IRanges::IRanges(start = c(10500, 50500), end = c(10700, 50700))
+)
+
+# Display plot
+p <- plot_regulatory_regions(gr, regulatory_gr)
+print(p)
+
+# Save plot
+ggplot2::ggsave("regulatory_overlap.png", plot = p, width = 7, height = 5)
 }
 }

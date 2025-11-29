@@ -18,11 +18,21 @@ genomic intervals versus those that failed annotation (have NA feature types).
 A high proportion of missing annotations may indicate problems with genome
 version mismatch, incorrect coordinate systems, or intervals in regions not
 covered by the annotation database (e.g., unplaced contigs).
+Returns a ggplot2 object that can be further customized or saved.
 }
 \examples{
 library(GenomicRanges)
 gr <- GRanges(seqnames = "chr1", ranges = IRanges::IRanges(c(100, 200, 300, 400), 
                                                             c(150, 250, 350, 450)))
 mcols(gr)$feature_type <- c("promoter", "intergenic", NA, "exon")
-plot_missing_annotations(gr)
+
+# Display plot
+p <- plot_missing_annotations(gr)
+print(p)
+
+# Customize and save
+p + ggplot2::labs(title = "Quality Check: Annotation Coverage") +
+    ggplot2::theme_bw()
+ggplot2::ggsave("annotation_qc.png", plot = p, width = 6, height = 4)
+
 }

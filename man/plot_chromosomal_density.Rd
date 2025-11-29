@@ -20,12 +20,23 @@ along each chromosome. The genome is divided into bins (default 1Mb), and the
 number of intervals in each bin is plotted. This visualization helps identify
 genomic regions with high clustering of intervals and can reveal patterns like
 enrichment near telomeres or centromeres. Each chromosome is shown in a 
-separate panel for easy comparison.
+separate panel for easy comparison. Returns a ggplot2 object that can be 
+further customized or saved.
 }
 \examples{
 bed_file <- system.file("extdata", "example.bed", package = "ReAnnotateR")
 if (file.exists(bed_file)) {
   gr <- read_bed(bed_file)
-  plot_chromosomal_density(gr)
+  
+  # Display plot
+  p <- plot_chromosomal_density(gr)
+  print(p)
+  
+  # Use smaller bins
+  p2 <- plot_chromosomal_density(gr, bin_size = 5e5)
+  print(p2)
+  
+  # Save plot
+  ggplot2::ggsave("density.png", plot = p, width = 10, height = 6)
 }
 }
