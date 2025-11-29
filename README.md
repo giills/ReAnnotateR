@@ -7,18 +7,21 @@
 
 **ReAnnotateR** provides a complete workflow for adding biological meaning to genomic regions stored in BED files, a widely used format for representing genomic coordinates across experiments such as ChIP-seq, ATAC-seq, methylation profiling, structural variant detection, and non-canonical DNA structure mapping. Unlike tools that target specific experiment types or single analysis steps, **ReAnnotateR** remains broad enough to use regardless of experiment type, and allows for flexibility of choosing reference genome. This streamlines analyses that would otherwise require multiple packages and manual data integration.
 
-ReAnnotateR was developed using R version 4.3.1
-
+ReAnnotateR was developed using R version 4.3.1 on Windows 11 (primary development), with cursory compatability testing on macOS
 
 ## Installation
 
 To install the latest version of the package:
-```{r installation, eval = FALSE}
+```r
 install.packages("devtools")
 library("devtools")
 devtools::install_github("giills/ReAnnotateR", build_vignettes = TRUE)
 library("ReAnnotateR")
 ```
+
+## Workflow Overview
+
+![ReAnnotateR Workflow](workflow.png)
 
 ReAnnotateR provides functions organized into three main categories:
 
@@ -42,14 +45,11 @@ ReAnnotateR provides functions organized into three main categories:
 - `plot_missing_annotations()` - Identifies and visualizes intervals that could not be annotated
 - `plot_annotation_summary()` - Provides overview plots of annotation statistics
 
-```{r workflow-diagram, echo=FALSE, out.width="100%", fig.cap="ReAnnotateR workflow overview"}
-knitr::include_graphics("workflow.png")
-```
-
 Refer to package vignettes for more details:
-```{r vignette, eval = FALSE}
+```r
 browseVignettes("ReAnnotateR")
 ```
+
 ## Contributions
 
 The author and sole contributor of this package is Julia Gilley. The author wrote all functions
@@ -70,7 +70,6 @@ in this package, as well as  the example workflow, unit tests, vignettes, and ot
 - `convert_coordinates()`: Uses `import.chain()` and `liftOver()` from rtracklayer package (Lawrence et al., 2009) for coordinate conversion between genome assemblies.
 
 **Contributions from generative AI:**
-
 Generative AI (Claude) was used at the end of the development of this package to enforce the desired style. This was achieved by tasking the generative AI with re-formatting and refactoring code, as well as removing relics from the development process, such as unused variables and unhelpful comments. 
 
 
@@ -93,7 +92,7 @@ R Core Team (2023). R: A language and environment for statistical computing. R F
 This package was developed as part of an assessment for 2025 BCB410H: Applied Bioinformatics course at the University of Toronto, Toronto, CANADA. Submit any issues at https://github.com/giills/ReAnnotateR/issues. 
 
 ## Package Structure
-```{r structure, eval = FALSE}
+```
 ReAnnotateR/
 ├── R/                          # R functions
 ├── data/                       # Example data
@@ -104,4 +103,3 @@ ReAnnotateR/
 ├── DESCRIPTION                # Package description
 └── NAMESPACE                  # Package namespace
 ```
-
