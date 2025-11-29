@@ -14,7 +14,9 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.width = 7,
-  fig.height = 5
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
 )
 ```
 
@@ -65,7 +67,7 @@ BiocManager::install(c("TxDb.Hsapiens.UCSC.hg38.knownGene", "org.Hs.eg.db"))
 
 # Load Required Libraries
 
-```{r libraries, message=FALSE, eval=has_txdb && has_orgdb}
+```{r libraries, eval=has_txdb && has_orgdb}
 library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 library(org.Hs.eg.db)
 ```
@@ -111,9 +113,13 @@ The first step is to classify each genomic interval by its feature type: promote
 txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene::TxDb.Hsapiens.UCSC.hg38.knownGene
 
 # Annotate regions (default: 3kb upstream, 3kb downstream for promoters)
-gr_annotated <- annotate_regions(gr, txdb_info = txdb, 
-                                  promoter_up = 2000, 
-                                  promoter_down = 500)
+# Note: Warnings about out-of-bound ranges on alternative contigs are expected
+# and can be safely ignored for standard chromosomes
+suppressWarnings({
+  gr_annotated <- annotate_regions(gr, txdb_info = txdb, 
+                                    promoter_up = 2000, 
+                                    promoter_down = 500)
+})
 
 # View feature distribution
 table(mcols(gr_annotated)$feature_type)
@@ -152,7 +158,7 @@ A distance of 0 indicates the interval overlaps the gene body.
 
 Perform Gene Ontology (GO) enrichment analysis to identify biological processes associated with the nearest genes.
 
-```{r functional-enrichment, message=FALSE, warning=FALSE, eval=has_txdb && has_orgdb}
+```{r functional-enrichment, eval=has_txdb && has_orgdb}
 # Perform GO enrichment (Biological Process)
 enrichment_results <- functional_terms(gr_with_genes, 
                                        orgdb = org.Hs.eg.db::org.Hs.eg.db, 
@@ -187,7 +193,9 @@ bg_gr <- GenomicRanges::GRanges(
   ranges = IRanges::IRanges(start = bg_starts, end = bg_ends)
 )
 
-bg_gr_annotated <- annotate_regions(bg_gr, txdb_info = txdb)
+suppressWarnings({
+  bg_gr_annotated <- annotate_regions(bg_gr, txdb_info = txdb)
+})
 
 promoter_enrichment <- fisher_enrichment(gr_annotated, 
                                          category = "promoter", 
@@ -234,7 +242,7 @@ if (!is.null(enrichment_results)) {
 
 ReAnnotateR includes several visualization functions based on ggplot2 (Wickham, 2016) to explore your data. All visualization functions return ggplot2 objects that can be further customized, saved with `ggsave()`, or displayed directly.
 
-```{r viz-setup, eval=has_txdb, message=FALSE}
+```{r viz-setup, eval=has_txdb}
 library(ggplot2)
 ```
 
@@ -251,9 +259,19 @@ p1 + labs(title = "My Custom Feature Plot") +
 
 ## Chromosomal Density
 
-```{r plot-density, eval=has_txdb, fig.width=7, fig.height=5}
-p2 <- plot_chromosomal_density(gr_annotated, bin_size = 1e6)
+This visualization shows the distribution of genomic intervals across chromosomes.
+
+```{r plot-density, eval=has_txdb, fig.width=10, fig.height=8}
+# Create the density plot with 10 Mb bins
+# This shows how intervals cluster along each chromosome
+p2 <- plot_chromosomal_density(gr_annotated, bin_size = 10e6)
 print(p2)
+
+# You can adjust bin size to see different levels of detail
+# Smaller bins (e.g., 5 Mb) show more fine-grained patterns:
+# p2_small <- plot_chromosomal_density(gr_annotated, bin_size = 5e6)
+# Larger bins (e.g., 20 Mb) show broader trends:
+# p2_large <- plot_chromosomal_density(gr_annotated, bin_size = 20e6)
 ```
 
 ## Enrichment Visualization

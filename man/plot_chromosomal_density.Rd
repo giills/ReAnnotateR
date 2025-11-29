@@ -15,7 +15,7 @@ plot_chromosomal_density(gr, bin_size = 1e+06)
 ggplot2 object showing number of intervals per bin along each chromosome
 }
 \description{
-Creates a multi-panel line plot showing how genomic intervals are distributed
+Creates a multi-panel plot showing how genomic intervals are distributed
 along each chromosome. The genome is divided into bins (default 1Mb), and the
 number of intervals in each bin is plotted. This visualization helps identify
 genomic regions with high clustering of intervals and can reveal patterns like
@@ -33,7 +33,7 @@ if (file.exists(bed_file)) {
   print(p)
   
   # Use smaller bins
-  p2 <- plot_chromosomal_density(gr, bin_size = 5e5)
+  p2 <- plot_chromosomal_density(gr, bin_size = 5e6)
   print(p2)
   
   # Save plot

@@ -61,7 +61,7 @@ plot_feature_composition <- function(gr) {
 
 #' Visualize Distribution of Genomic Intervals Across Chromosomes
 #'
-#' Creates a multi-panel line plot showing how genomic intervals are distributed
+#' Creates a multi-panel plot showing how genomic intervals are distributed
 #' along each chromosome. The genome is divided into bins (default 1Mb), and the
 #' number of intervals in each bin is plotted. This visualization helps identify
 #' genomic regions with high clustering of intervals and can reveal patterns like
@@ -82,13 +82,13 @@ plot_feature_composition <- function(gr) {
 #'   print(p)
 #'   
 #'   # Use smaller bins
-#'   p2 <- plot_chromosomal_density(gr, bin_size = 5e5)
+#'   p2 <- plot_chromosomal_density(gr, bin_size = 5e6)
 #'   print(p2)
 #'   
 #'   # Save plot
 #'   ggplot2::ggsave("density.png", plot = p, width = 10, height = 6)
 #' }
-#' @importFrom ggplot2 ggplot aes geom_line labs theme_minimal facet_wrap
+#' @importFrom ggplot2 ggplot aes geom_col labs theme_minimal facet_wrap theme element_text scale_x_continuous
 #' @importFrom GenomicRanges seqnames start
 #' @importFrom stats aggregate
 #' @importFrom rlang .data
@@ -97,22 +97,39 @@ plot_chromosomal_density <- function(gr, bin_size = 1e6) {
   chr_list <- as.character(GenomicRanges::seqnames(gr))
   starts <- GenomicRanges::start(gr)
   
-  df <- data.frame(chr = chr_list, start = starts)
+  df <- data.frame(chr = chr_list, start = starts, stringsAsFactors = FALSE)
   
-  df$bin <- floor(df$start / bin_size) + 1
+  # Assign each interval to a bin (use bin midpoint for better visualization)
+  df$bin <- floor(df$start / bin_size) * bin_size + (bin_size / 2)
   
+  # Count intervals per bin per chromosome
   density_df <- aggregate(start ~ chr + bin, data = df, FUN = length)
   colnames(density_df)[3] <- "count"
   
-  p <- ggplot2::ggplot(density_df, ggplot2::aes(x = .data$bin * bin_size, y = .data$count, color = .data$chr)) +
-    ggplot2::geom_line() +
-    ggplot2::facet_wrap(~ chr, scales = "free_x") +
+  # Ensure bin is numeric (not scientific notation issues)
+  density_df$bin <- as.numeric(density_df$bin)
+  
+  # Create the plot
+  p <- ggplot2::ggplot(density_df, ggplot2::aes(x = .data$bin, y = .data$count)) +
+    ggplot2::geom_col(fill = "steelblue", color = "steelblue", width = bin_size * 0.8) +
+    ggplot2::facet_wrap(~ chr, scales = "free_x", ncol = 2) +
     ggplot2::labs(
-      x = "Genomic Position (bp)",
+      x = "Genomic Position (Mb)",
       y = "Number of Intervals",
       title = "Chromosomal Density of Genomic Intervals"
     ) +
-    ggplot2::theme_minimal()
+    ggplot2::scale_x_continuous(
+      labels = function(x) round(x / 1e6, 0),
+      expand = c(0.02, 0)
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = 9),
+      axis.text.y = ggplot2::element_text(size = 9),
+      strip.text = ggplot2::element_text(size = 10, face = "bold"),
+      panel.grid.major.x = ggplot2::element_line(color = "grey90"),
+      panel.grid.minor.x = ggplot2::element_blank()
+    )
   
   return(p)
 }
