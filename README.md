@@ -18,6 +18,25 @@ library("devtools")
 devtools::install_github("giills/ReAnnotateR", build_vignettes = TRUE)
 library("ReAnnotateR")
 ```
+## To Run the Shiny App
+
+After installing and loading **ReAnnotateR**, you can launch the Shiny application in two ways:
+
+### Option 1: Using the wrapper function
+
+The package provides a convenience function that starts the Shiny app:
+
+```r
+library(ReAnnotateR)
+RunReAnnotateR()
+```
+### Option 2: Running the app directly
+You can also launch the app by calling the Shiny script located in inst/shiny-scripts/app.R:
+```
+shiny::runApp(system.file("shiny-scripts", package = "ReAnnotateR"))
+
+```
+
 
 ## Workflow Overview
 
