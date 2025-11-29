@@ -1,8 +1,10 @@
 ---
 title: "ReAnnotateR: Functional Annotation of Genomic Intervals"
+author: "Julia Gilley"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ReAnnotateR Tutorial}
+  %\VignetteIndexEntry{ReAnnotateR: Functional Annotation of Genomic Intervals}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -55,7 +57,7 @@ This package builds upon established Bioconductor infrastructure including Genom
 
 ```{r install, eval=FALSE}
 # Install from GitHub
-devtools::install_github("giills/ReAnnotateR")
+devtools::install_github("giills/ReAnnotateR", build_vignettes = TRUE)
 
 # Install required Bioconductor packages
 BiocManager::install(c("TxDb.Hsapiens.UCSC.hg38.knownGene", "org.Hs.eg.db"))
@@ -230,7 +232,7 @@ if (!is.null(enrichment_results)) {
 
 # Visualization
 
-ReAnnotateR includes several visualization functions based on ggplot2 (Wickham, 2016) to explore your data:
+ReAnnotateR includes several visualization functions based on ggplot2 (Wickham, 2016) to explore your data. All visualization functions return ggplot2 objects that can be further customized, saved with `ggsave()`, or displayed directly.
 
 ```{r viz-setup, eval=has_txdb, message=FALSE}
 library(ggplot2)
@@ -239,19 +241,61 @@ library(ggplot2)
 ## Feature Composition
 
 ```{r plot-features, eval=has_txdb, fig.width=7, fig.height=5}
-plot_feature_composition(gr_annotated)
+p1 <- plot_feature_composition(gr_annotated)
+print(p1)
+
+# You can customize the returned plot
+p1 + labs(title = "My Custom Feature Plot") + 
+     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 ## Chromosomal Density
 
 ```{r plot-density, eval=has_txdb, fig.width=7, fig.height=5}
-plot_chromosomal_density(gr_annotated, bin_size = 1e6)
+p2 <- plot_chromosomal_density(gr_annotated, bin_size = 1e6)
+print(p2)
+```
+
+## Enrichment Visualization
+
+```{r plot-enrichment, eval=has_txdb && has_orgdb, fig.width=7, fig.height=5}
+# Plot enrichment results if available
+if (!is.null(enrichment_results$go) && nrow(enrichment_results$go) > 0) {
+  p3 <- plot_enrichment(enrichment_results$go, top_n = 10)
+  print(p3)
+} else {
+  message("No enrichment results to plot for this example dataset")
+  
+  # Show what the plot would look like with simulated data
+  simulated_enrichment <- data.frame(
+    Description = c("DNA repair", "cell cycle", "apoptosis", 
+                    "signal transduction", "transcription"),
+    p.adjust = c(0.001, 0.005, 0.01, 0.02, 0.04)
+  )
+  p3 <- plot_enrichment(simulated_enrichment, top_n = 5)
+  print(p3)
+}
 ```
 
 ## Annotation Summary
 
 ```{r plot-summary, eval=has_txdb, fig.width=7, fig.height=5}
-plot_annotation_summary(gr_annotated)
+p4 <- plot_annotation_summary(gr_annotated)
+print(p4)
+```
+
+## Saving Plots
+
+All plots can be saved using `ggsave()`:
+
+```{r save-plots, eval=FALSE}
+# Save a single plot
+ggsave("feature_composition.png", plot = p1, width = 7, height = 5)
+
+# Save all plots
+ggsave("chromosomal_density.png", plot = p2, width = 10, height = 6)
+ggsave("enrichment.png", plot = p3, width = 8, height = 6)
+ggsave("annotation_summary.png", plot = p4, width = 7, height = 5)
 ```
 
 # Session Info

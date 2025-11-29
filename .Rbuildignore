@@ -12,3 +12,5 @@
 ^feature_distribution\.pdf$
 ^workflow\.png$
 ^_snaps$
+^doc$
+^Meta$
