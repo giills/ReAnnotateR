@@ -7,7 +7,7 @@
 
 **ReAnnotateR** provides a complete workflow for adding biological meaning to genomic regions stored in BED files, a widely used format for representing genomic coordinates across experiments such as ChIP-seq, ATAC-seq, methylation profiling, structural variant detection, and non-canonical DNA structure mapping. Unlike tools that target specific experiment types or single analysis steps, **ReAnnotateR** remains broad enough to use regardless of experiment type, and allows for flexibility of choosing reference genome. This streamlines analyses that would otherwise require multiple packages and manual data integration.
 
-ReAnnotateR was developed using R version 4.3.1 on Windows 11 (primary development), with cursory compatability testing on macOS
+ReAnnotateR was developed using R version 4.5.2 on Windows 11, with cursory compatability testing on macOS
 
 ## Installation
 
