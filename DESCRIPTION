@@ -1,10 +1,10 @@
 Package: ReAnnotateR
 Type: Package
 Title: Genomic Region Annotation and Visualization
-Version: 0.1.0
-Author: Your Name
-Maintainer: Your Name <your@email.com>
-Description: Tools for annotating, enriching, and visualizing genomic BED regions.
+Version: 1.0.0
+Author: Julia Gilley
+Maintainer: Julia Gilley <julia.gilley@mail.utoronto.ca>
+Description: Functions for annotating genomic regions from BED files. Includes visualization and enrichment analysis.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
